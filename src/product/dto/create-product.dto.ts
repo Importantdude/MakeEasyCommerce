@@ -20,4 +20,4 @@ export class ProductDto {
 		final_price: number;
 }
 
-export class CreateProductDto extends PartialType(ProductDto) {}
+export class CreateProductDto extends (ProductDto) {}

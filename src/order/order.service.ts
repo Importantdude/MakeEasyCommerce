@@ -3,7 +3,6 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { GetOrderDto } from './dto/get-order.dto';
 import { DefaultOrderDto } from './dto/enum/enum-order.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { BasketService } from 'src/basket/basket.service';
 import { UserService } from 'src/user/user.service';
 

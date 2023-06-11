@@ -5,7 +5,8 @@ import {
 	ValidateNested,
 	IsNumber,
 	IsNotEmpty,
-	IsEmail
+	IsEmail,
+	IsArray
 } from 'class-validator';
 
 export class UserDto {
@@ -27,7 +28,11 @@ export class UserDto {
 		country: string;
 }
 
-export class CreateUserDto extends PartialType(UserDto) {
+export class CreateUserDto extends UserDto {
+	@IsString()
+	@IsNotEmpty()
+	@ApiProperty()
+		country: string;
     @IsOptional()
     @IsString()
     @ApiProperty()
@@ -48,6 +53,41 @@ export class CreateUserDto extends PartialType(UserDto) {
     @IsNotEmpty()
 	@ApiProperty()
 		houseNumber: number;
+    @IsOptional()
+    @IsString()
+    @ApiProperty()
+        company: string;
+    @IsOptional()
+    @IsString()
+    @ApiProperty()
+        tax_id: string;
+}
+
+export class UserAddressDto {
+	@IsString()
+	@IsNotEmpty()
+	@ApiProperty()
+		country: string;
+	@IsString()
+    @IsNotEmpty()
+	@ApiProperty()
+		city: string;
+	@IsString()
+    @IsNotEmpty()
+	@ApiProperty()
+		zipCode: string;
+	@IsString()
+    @IsNotEmpty()
+	@ApiProperty()
+		streetName: string;
+	@IsNumber()
+    @IsNotEmpty()
+	@ApiProperty()
+		houseNumber: number;
+    @IsOptional()
+    @IsString()
+	@ApiProperty()
+		phoneNumber: string;
     @IsOptional()
     @IsString()
     @ApiProperty()

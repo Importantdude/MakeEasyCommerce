@@ -22,8 +22,8 @@ export class BasketService {
 
   async getDefaultBasket(): Promise<GetBasketDto> {
     return {
-      basket_id: Number(DefaultOrderBasketDto.basket_id),
-      basket_total_price: Number(DefaultOrderBasketDto.basket_total_price),
+      basket_id: DefaultOrderBasketDto.basket_id,
+      basket_total_price: DefaultOrderBasketDto.basket_total_price,
       products: [
         {
           product_id: Number(DefaultOrderProductDto.product_id),
