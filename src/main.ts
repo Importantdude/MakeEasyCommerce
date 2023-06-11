@@ -29,8 +29,8 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('PartnerPlatform')
-    .setDescription('PartnerPlatform')
+    .setTitle('MakeEasyCommerce')
+    .setDescription('AllCommerceInOneCentralizedSystem')
     .setVersion('1.0')
     .build();
 
