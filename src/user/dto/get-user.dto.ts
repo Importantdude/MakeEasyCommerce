@@ -7,41 +7,13 @@ import {
 	IsNotEmpty,
 	IsEmail
 } from 'class-validator';
-import { UserDto } from './create-user.dto';
+import { CreateUserDto, UserDto } from './create-user.dto';
 
-export class GetUserDto extends PartialType(UserDto) {
+export class GetUserDto extends UserDto {
 	@IsNumber()
     @IsNotEmpty()
 	@ApiProperty()
 		user_id: number;
-	@IsOptional()
-	@IsString()
-	@ApiProperty()
-		phoneNumber: string;
-	@IsString()
-    @IsNotEmpty()
-	@ApiProperty()
-		city: string;
-	@IsString()
-    @IsNotEmpty()
-	@ApiProperty()
-		zipCode: string;
-	@IsString()
-    @IsNotEmpty()
-	@ApiProperty()
-		streetName: string;
-	@IsNumber()
-    @IsNotEmpty()
-	@ApiProperty()
-		houseNumber: number;
-    @IsOptional()
-    @IsString()
-    @ApiProperty()
-        company: string;
-    @IsOptional()
-    @IsString()
-    @ApiProperty()
-        tax_id: string;
 }
 
 export class UserShortDto {

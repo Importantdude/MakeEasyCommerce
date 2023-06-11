@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { BasketService } from './basket.service';
 import { CreateBasketDto } from './dto/create-basket.dto';
 import { UpdateBasketDto } from './dto/update-basket.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetBasketDto } from './dto/get-basket.dto';
 
 @ApiTags('Basket')
 @Controller('basket')
@@ -17,6 +18,13 @@ export class BasketController {
   @Get()
   findAll() {
     return this.basketService.findAll();
+  }
+  
+  @Get('defaultBasket')
+	@ApiOperation({ summary: 'Default Basket', description: 'Idea is to fetch default (enum) hardcoded Basket data' })
+	@ApiOkResponse({ description: 'Default Basket Dto', type: GetBasketDto })
+  getDefaultBasket() {
+    return this.basketService.getDefaultBasket();
   }
 
   @Get(':id')

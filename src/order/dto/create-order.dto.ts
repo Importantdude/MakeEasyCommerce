@@ -1,56 +1,26 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsNotEmpty, IsString, ValidateNested } from "class-validator";
 import { GetBasketDto } from "src/basket/dto/get-basket.dto";
-import { UserDto } from "src/user/dto/create-user.dto";
+import { UserAddressDto } from "src/user/dto/create-user.dto";
 
-export class CreateOrderDto {
+export class OrderDto {
     @IsNotEmpty()
     @IsString()
     @ApiProperty()
         order_type: string
     @IsNotEmpty()
-    @ApiProperty({ type: () => CreateAddressDto })
-	@ValidateNested()
-		shipping_address: CreateAddressDto[];
-    @IsNotEmpty()
-    @ApiProperty({ type: () => CreateAddressDto })
-    @ValidateNested()
-        payment_address: CreateAddressDto[];
-    @IsNotEmpty()
     @IsArray()
     @ApiProperty({ type: () => GetBasketDto })
     @ValidateNested()
         basket: GetBasketDto[];
+    @IsNotEmpty()
+    @ApiProperty({ type: () => UserAddressDto })
+	@ValidateNested()
+		shipping_address: UserAddressDto[];
+    @IsNotEmpty()
+    @ApiProperty({ type: () => UserAddressDto })
+    @ValidateNested()
+        payment_address: UserAddressDto[];
 }
 
-export class CreateAddressDto {
-    @IsNotEmpty()
-    @IsArray()
-    @ApiProperty({ type: () => UserDto })
-    @ValidateNested()
-        user: UserDto[];
-	@IsString()
-    @IsNotEmpty()
-	@ApiProperty()
-		city: string;
-	@IsString()
-    @IsNotEmpty()
-	@ApiProperty()
-		zipCode: string;
-	@IsString()
-    @IsNotEmpty()
-	@ApiProperty()
-		streetName: string;
-	@IsString()
-    @IsNotEmpty()
-	@ApiProperty()
-		houseNumber: string;
-    @IsOptional()
-    @IsString()
-	@ApiProperty()
-		phoneNumber: string;
-    @IsOptional()
-    @IsString()
-    @ApiProperty()
-        company: string;
-}
+export class CreateOrderDto extends OrderDto {}

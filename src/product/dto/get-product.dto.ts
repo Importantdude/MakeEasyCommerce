@@ -13,14 +13,14 @@ export class GetProductDto extends PartialType(ProductDto) {
     @IsNotEmpty()
 	@ApiProperty()
 		product_id: number;
-    @IsNotEmpty()
-    @ApiProperty({ type: () => GetProductEavCollection })
-    @ValidateNested()
-        product_eav_collection: GetProductEavCollection[];
-    @IsOptional()
-    @ApiProperty({ type: () => GetProductVariantsShort })
-    @ValidateNested()
-        product_variants: GetProductVariantsShort[];
+    // @IsNotEmpty()
+    // @ApiProperty({ type: () => GetProductEavCollection })
+    // @ValidateNested()
+    //     product_eav_collection: GetProductEavCollection[];
+    // @IsOptional()
+    // @ApiProperty({ type: () => GetProductVariantsShort })
+    // @ValidateNested()
+    //     product_variants: GetProductVariantsShort[];
     // here, you are welcome one day
 }
 

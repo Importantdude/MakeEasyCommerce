@@ -8,6 +8,7 @@ export enum DefaultOrderTypeDto {
 
 export enum DefaultOrderDto {
     order_id = 1,
+    order_type = 'FREE_ORDER',
     basket_id = 1
 }
 
