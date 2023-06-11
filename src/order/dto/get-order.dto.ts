@@ -1,3 +1,14 @@
+import { OrderDto } from "./create-order.dto";
+
+export class GetOrderDto extends OrderDto {
+
+}
+
+
+
+
+
+
 // import { ApiProperty } from "@nestjs/swagger";
 // import { IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
 // import { CreateUserDto } from "src/user/dto/create-user.dto";

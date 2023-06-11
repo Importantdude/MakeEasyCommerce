@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { UserDto } from './create-user.dto';
 
-export class GetUserDto extends PartialType(UserDto) {
+export class GetUserDto extends (UserDto) {
 	@IsNumber()
     @IsNotEmpty()
 	@ApiProperty()

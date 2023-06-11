@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetProductDto } from './dto/get-product.dto';
 
 @ApiTags('Product')
 @Controller('product')
@@ -17,6 +18,13 @@ export class ProductController {
   @Get()
   findAll() {
     return this.productService.findAll();
+  }
+
+  @Get('defaultProduct')
+	@ApiOperation({ summary: 'Default Product', description: 'Idea is to fetch default (enum) hardcoded Product data' })
+	@ApiOkResponse({ description: 'Default Product Dto', type: GetProductDto })
+  getDefaultProduct() {
+    return this.productService.getDefaultProduct();
   }
 
   @Get(':id')

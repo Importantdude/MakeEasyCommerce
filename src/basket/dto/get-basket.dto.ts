@@ -7,7 +7,7 @@ import { BasketDto } from "./create-basket.dto";
 // Marketing, cart price/any other rules that supposed
 // to affect final price
 
-export class GetBasketDto extends PartialType(BasketDto) {
+export class GetBasketDto extends BasketDto {
     @IsNotEmpty()
     @IsNumber()
     @ApiProperty()

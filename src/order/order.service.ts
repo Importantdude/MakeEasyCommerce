@@ -1,9 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { GetOrderDto } from './dto/get-order.dto';
+import { DefaultOrderDto } from './dto/enum/enum-order.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BasketService } from 'src/basket/basket.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class OrderService {
+
+  constructor(
+    private readonly basketService: BasketService,
+    private readonly userService: UserService
+  ){}
+
   create(createOrderDto: CreateOrderDto) {
     return 'This action adds a new order';
   }
@@ -14,6 +25,19 @@ export class OrderService {
 
   findOne(id: number) {
     return `This action returns a #${id} order`;
+  }
+
+  
+  async getDefaultOrder(): Promise<GetOrderDto> {
+    const basket = await this.basketService.getDefaultBasket();
+    const address = await this.userService.getDefaultUserAddress();
+
+    return {
+      order_type: DefaultOrderDto.order_type.toString(),
+      basket: [basket],
+      shipping_address: [address],
+      payment_address: [address]
+    }
   }
 
   update(id: number, updateOrderDto: UpdateOrderDto) {

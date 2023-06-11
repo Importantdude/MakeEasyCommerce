@@ -2,21 +2,29 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetUserDto } from './dto/get-user.dto';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
+  @Post('')
   create(@Body() CreateUserDto: CreateUserDto) {
     return this.userService.create(CreateUserDto);
   }
 
-  @Get()
+  @Get('')
   findAll() {
     return this.userService.findAll();
+  }
+
+  @Get('defaultUser')
+	@ApiOperation({ summary: 'Default User', description: 'Idea is to fetch default (enum) hardcoded user data' })
+	@ApiOkResponse({ description: 'Default User Dto', type: GetUserDto })
+  getDefaultUser() {
+    return this.userService.getDefaultUser();
   }
 
   @Get(':id')

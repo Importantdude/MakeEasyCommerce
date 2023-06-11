@@ -10,7 +10,8 @@ import {
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetOrderDto } from './dto/get-order.dto';
 
 @ApiTags('Order')
 @Controller('order')
@@ -25,6 +26,13 @@ export class OrderController {
   @Get()
   findAll() {
     return this.orderService.findAll();
+  }
+
+  @Get('defaultOrder')
+	@ApiOperation({ summary: 'Default Order', description: 'Idea is to fetch default (enum) hardcoded Order data' })
+	@ApiOkResponse({ description: 'Default Order Dto', type: GetOrderDto })
+  getDefaultOrder() {
+    return this.orderService.getDefaultOrder();
   }
 
   @Get(':id')
