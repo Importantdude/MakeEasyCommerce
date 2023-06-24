@@ -4,7 +4,7 @@ import { UpdateBasketDto } from './dto/update-basket.dto';
 import { GetBasketDto } from './dto/get-basket.dto';
 import { DefaultOrderBasketDto } from './dto/enum/enum-basket.dto';
 import { DefaultOrderProductDto } from 'src/product/dto/enum/enum-product.dto';
-import { DefaultOrderUserDto } from 'src/user/dto/enum/enum-user.dto';
+import { DefaultOrderCustomerDto } from 'src/customer/dto/enum/enum-customer.dto';
 
 @Injectable()
 export class BasketService {
@@ -30,9 +30,9 @@ export class BasketService {
           total_price: Number(DefaultOrderProductDto.final_price)
         }
       ],
-      user: [
+      customer: [
         {
-          user_id: Number(DefaultOrderUserDto.user_id)
+          id: Number(DefaultOrderCustomerDto.id)
         }
       ]
     }

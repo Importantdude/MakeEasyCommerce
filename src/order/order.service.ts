@@ -4,14 +4,14 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { GetOrderDto } from './dto/get-order.dto';
 import { DefaultOrderDto } from './dto/enum/enum-order.dto';
 import { BasketService } from 'src/basket/basket.service';
-import { UserService } from 'src/user/user.service';
+import { CustomerService } from 'src/customer/customer.service';
 
 @Injectable()
 export class OrderService {
 
   constructor(
-    private readonly basketService: BasketService,
-    private readonly userService: UserService
+    // private readonly basketService: BasketService,
+    // private readonly customerService: CustomerService
   ){}
 
   create(createOrderDto: CreateOrderDto) {
@@ -28,15 +28,17 @@ export class OrderService {
 
   
   async getDefaultOrder(): Promise<GetOrderDto> {
-    const basket = await this.basketService.getDefaultBasket();
-    const address = await this.userService.getDefaultUserAddress();
+    
+    // const basket = await this.basketService.getDefaultBasket();
+    // const address = await this.customerService.getDefaultCustomerAddress();
 
-    return {
-      order_type: DefaultOrderDto.order_type.toString(),
-      basket: [basket],
-      shipping_address: [address],
-      payment_address: [address]
-    }
+    // return {
+    //   order_type: DefaultOrderDto.order_type.toString(),
+    //   basket: [basket],
+    //   shipping_address: [address],
+    //   payment_address: [address]
+    // }
+    return null;
   }
 
   update(id: number, updateOrderDto: UpdateOrderDto) {
