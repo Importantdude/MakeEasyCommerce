@@ -1,5 +1,5 @@
 import { IsEmail, IsNumber, IsString } from "class-validator";
-import { Column, Entity, JoinColumn, JoinTable, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Customer } from "./customer.entity";
 import { CustomerAddressDetails } from "./customer-address-detailed.entity";
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { DefaultOrderCustomerDto } from './dto/enum/enum-customer.dto';
+import { DefaultOrderCustomerAddressDto, DefaultOrderCustomerDto, DefaultOrderCustomerAddressDetailsDto } from './dto/enum/enum-customer.dto';
 import { GetAddressDetailsDto, GetCustomerAddressDto, GetCustomerDto } from './dto/get-customer.dto';
 import { AddressDetailsDto, AddressDto } from './dto/address/customer-address.dto';
 import { EntityManager, Repository } from 'typeorm';
@@ -21,7 +21,7 @@ export class CustomerService {
 		@InjectRepository(CustomerAddressDetails)
     private readonly customerAddressDetailsRepository: Repository<CustomerAddressDetails>,
     @InjectEntityManager()
-    private readonly customerManager: EntityManager
+    private readonly entityManager: EntityManager
 	) {}
 
   async create(createCustomerDto: CreateCustomerDto): Promise<GetCustomerDto> {
@@ -89,12 +89,17 @@ export class CustomerService {
 
   }
 
-  findAll() {
-    return `This action returns all customer`;
+  async findAll(): Promise<GetCustomerDto[]> {
+    return this.entityManager.find(Customer, {
+      relations: ['customer_address','customer_address.address_details']
+    })
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`;
+  async findOne(id: number): Promise<GetCustomerDto> {
+    return this.entityManager.findOneOrFail(Customer, {
+      where: { id: id },
+      relations: ['customer_address','customer_address.address_details']
+    })
   }
 
   async findOneBy(search_criteria: string, search_param: string, search_relation: string): Promise<GetCustomerDto> {
@@ -102,29 +107,48 @@ export class CustomerService {
   }
 
   async getDefaultCustomer(): Promise<GetCustomerDto> {
-    // return {
-    //   id: Number(DefaultOrderCustomerDto.id), 
-    //   first_name: DefaultOrderCustomerDto.first_name.toString().toString(), 
-    //   last_name: DefaultOrderCustomerDto.last_name.toString(), 
-    //   email: DefaultOrderCustomerDto.email.toString(),
-    //   store_id: DefaultOrderCustomerDto.store_id.toString()
-    // };
-
-    return null;
+    return {
+      id: Number(DefaultOrderCustomerDto.id), 
+      first_name: DefaultOrderCustomerDto.first_name.toString().toString(), 
+      last_name: DefaultOrderCustomerDto.last_name.toString(), 
+      email: DefaultOrderCustomerDto.email.toString(),
+      store_id: Number(DefaultOrderCustomerDto.store_id),
+      customer_address: [
+        {
+          id: Number(DefaultOrderCustomerAddressDto.id),
+          country: DefaultOrderCustomerAddressDto.country.toString(),
+          postal_code: DefaultOrderCustomerAddressDto.postal_code.toString(),
+          address_type: Number(DefaultOrderCustomerAddressDto.address_type),
+          address_details: {
+            id: Number(DefaultOrderCustomerAddressDetailsDto.id),
+            city: DefaultOrderCustomerAddressDetailsDto.city.toString(),
+            street_name: DefaultOrderCustomerAddressDetailsDto.street_name.toString(),
+            house_number: DefaultOrderCustomerAddressDetailsDto.house_number.toString(),
+            phone_number: DefaultOrderCustomerAddressDetailsDto.phone_number.toString(),
+            company: DefaultOrderCustomerAddressDetailsDto.company.toString(),
+            tax_id: DefaultOrderCustomerAddressDetailsDto.tax_id.toString()
+          }
+        }
+      ]
+    };
   }
 
-  async getDefaultCustomerAddress(): Promise<AddressDto>{
-    return null;
-    // return{
-    //   store_id: DefaultOrderCustomerDto.store_id.toString(),
-    //   city: DefaultOrderCustomerDto.city.toString(),
-    //   postal_code: DefaultOrderCustomerDto.postal_code.toString(),
-    //   street_name: DefaultOrderCustomerDto.street_name.toString(),
-    //   house_number: Number(DefaultOrderCustomerDto.house_number),
-    //   phone_number: DefaultOrderCustomerDto.phone_number.toString(),
-    //   company: DefaultOrderCustomerDto.company.toString(),
-    //   tax_id: DefaultOrderCustomerDto.tax_id.toString()
-    // }
+  async getDefaultCustomerAddress(): Promise<GetCustomerAddressDto>{
+    return {
+      id: Number(DefaultOrderCustomerAddressDto.id),
+      country: DefaultOrderCustomerAddressDto.country.toString(),
+      postal_code: DefaultOrderCustomerAddressDto.postal_code.toString(),
+      address_type: Number(DefaultOrderCustomerAddressDto.address_type),
+      address_details: {
+        id: Number(DefaultOrderCustomerAddressDetailsDto.id),
+        city: DefaultOrderCustomerAddressDetailsDto.city.toString(),
+        street_name: DefaultOrderCustomerAddressDetailsDto.street_name.toString(),
+        house_number: DefaultOrderCustomerAddressDetailsDto.house_number.toString(),
+        phone_number: DefaultOrderCustomerAddressDetailsDto.phone_number.toString(),
+        company: DefaultOrderCustomerAddressDetailsDto.company.toString(),
+        tax_id: DefaultOrderCustomerAddressDetailsDto.tax_id.toString()
+      }
+    }
   }
 
   update(id: number, updateCustomerDto: UpdateCustomerDto) {

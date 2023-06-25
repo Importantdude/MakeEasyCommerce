@@ -1,7 +1,5 @@
-import { IsEmail, IsNumber, IsString } from "class-validator";
-import { Column, Entity, JoinColumn, JoinTable, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Customer } from "./customer.entity";
-import { CustomerAddress } from "./customer-address.entity";
+import { IsString } from "class-validator";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class CustomerAddressDetails {
@@ -25,6 +23,4 @@ export class CustomerAddressDetails {
     @IsString()
     @Column()
         tax_id: string;
-    // @OneToOne(() => CustomerAddress, (customer_address) => customer_address.address_details)
-    //     customer_address: CustomerAddress;
 }

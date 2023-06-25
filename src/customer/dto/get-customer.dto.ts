@@ -17,7 +17,7 @@ export class GetCustomerDto extends CustomerDto {
 		id: number;
 	@IsNotEmpty()
 	@ApiProperty({ type: () => [GetCustomerAddressDto] })
-	@ValidateNested({ each:true })
+	@ValidateNested()
 		customer_address : GetCustomerAddressDto[]
 }
 
@@ -33,7 +33,7 @@ export class GetCustomerAddressDto extends AddressDto {
     @IsNotEmpty()
 	@ApiProperty()
 		id: number;
-	@IsOptional()
+	@IsNotEmpty()
 	@ApiProperty({ type: () => GetAddressDetailsDto })
 	@ValidateNested()
 		address_details: GetAddressDetailsDto
