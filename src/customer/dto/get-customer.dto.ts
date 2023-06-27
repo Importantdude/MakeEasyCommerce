@@ -36,7 +36,7 @@ export class GetCustomerAddressDto extends AddressDto {
 		address_details: GetAddressDetailsDto
 }
 
-export class CustomerShortDto {
+export class GetCustomerShortDto extends CustomerDto{
 	@IsNumber()
     @IsNotEmpty()
 	@ApiProperty()

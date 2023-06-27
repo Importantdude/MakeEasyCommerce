@@ -32,7 +32,11 @@ export class BasketService {
       ],
       customer: [
         {
-          id: Number(DefaultOrderCustomerDto.id)
+          id: Number(DefaultOrderCustomerDto.id),
+          first_name: null,
+          last_name: null,
+          email: null,
+          store_id: null
         }
       ]
     }

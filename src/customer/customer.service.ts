@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerAddressDto, UpdateCustomerDto } from './dto/update-customer.dto';
 import { DefaultOrderCustomerAddressDto, DefaultOrderCustomerDto, DefaultOrderCustomerAddressDetailsDto } from './dto/enum/enum-customer.dto';
-import { GetAddressDetailsDto, GetCustomerAddressDto, GetCustomerDto } from './dto/get-customer.dto';
+import { GetAddressDetailsDto, GetCustomerAddressDto, GetCustomerDto, GetCustomerShortDto } from './dto/get-customer.dto';
 import { AddressDetailsDto, AddressDto } from './dto/address/customer-address.dto';
 import { Any, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
@@ -73,10 +73,11 @@ export class CustomerService {
 
         customer.customer_address = addressRes;
         return await this.customerRepository.save(customer);
-
       }
 
       const partialCustomerData = await this.customerRepository.save(customer);
+
+      return partialCustomerData;
 
       // INVESTIGATE
       // return await this.customerRepository
@@ -86,18 +87,9 @@ export class CustomerService {
       //           .of(customer)
       //           .add(customer)
 
-      return {
-        id: partialCustomerData.id,
-        first_name: partialCustomerData.first_name,
-        last_name: partialCustomerData.last_name,
-        email: partialCustomerData.email,
-        store_id: partialCustomerData.store_id,
-        customer_address: null
-      }
     }
     
     return null;
-
   }
 
   async findAll(): Promise<GetCustomerDto[]> {
@@ -167,25 +159,18 @@ export class CustomerService {
   async update(customer_id: number, updateCustomerDto: UpdateCustomerDto): Promise<GetCustomerDto> {
     const partialEntityCustomer : UpdateCustomerDto = {
       id: customer_id,
+      customer_address: null,
       ...updateCustomerDto
     }
 
-    const customer : UpdateCustomerDto = await this.entityManager.preload(Customer, partialEntityCustomer);
+    const customer : GetCustomerShortDto = await this.entityManager.preload(Customer, partialEntityCustomer);
     
-    const res =[];
-    if(this.entityManager.hasId(customer)){
-      res.push(this.entityManager.getId(customer));
-    }  
-    console.log(res);
+    const address_updated = await this.updateCustomerAddress(customer_id, updateCustomerDto.customer_address);
+    // console.log(res);
     try {
       return {
-        customer_address: await this.updateCustomerAddress(customer_id, updateCustomerDto.customer_address),
-        ...(await this.customerRepository
-        .createQueryBuilder()
-        .update(Customer)
-        .set(customer)
-        .execute()
-        ).raw
+        customer_address: address_updated,
+        ...await this.customerRepository.save(customer)
       }
     } catch (e) {
       return e.message;
@@ -198,14 +183,14 @@ export class CustomerService {
     
     try{
       for(const address of updateCustomerAddress){
-        const reduced_index = (updateCustomerAddress.length - addresses.length) * - 1;
         addresses.push(await this.entityManager.preload(CustomerAddress, address));
       }
+
+      return await this.customerAddressRepository.save(addresses);
+
     } catch (e) {
       return e.message;
     }
-
-    return await this.customerAddressRepository.save(addresses);
   }
 
   async remove(id: number) {

@@ -25,7 +25,7 @@ export class UpdateCustomerAddressDto extends (UpdateAddressDto) {}
 
 export class UpdateCustomerDto extends (CustomerDto) {
 	@IsNumber()
-	@IsNotEmpty()
+	@IsOptional()
 	@ApiProperty()
 		id: number;
     @IsNotEmpty()
