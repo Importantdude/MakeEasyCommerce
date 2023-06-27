@@ -19,9 +19,11 @@ export class Customer {
     @IsNumber()
     @Column()
         store_id: number;
-    @OneToMany(() => CustomerAddress, (customer_address) => customer_address.customer, { cascade: true, onDelete: 'CASCADE' })
-    @JoinColumn({
-        foreignKeyConstraintName: "fk_customer_index_index"
+    @OneToMany(() => CustomerAddress, (customer_address) => customer_address.customer, { 
+        cascade: true,
+        eager: true,
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     })
         customer_address: CustomerAddress[];
 }

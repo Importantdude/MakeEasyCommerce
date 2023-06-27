@@ -1,13 +1,10 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {
-	IsString,
-	IsOptional,
 	ValidateNested,
 	IsNumber,
-	IsNotEmpty,
-	IsEmail
+	IsNotEmpty
 } from 'class-validator';
-import { CreateCustomerDto, CustomerDto } from './create-customer.dto';
+import { CustomerDto } from './create-customer.dto';
 import { AddressDetailsDto, AddressDto } from './address/customer-address.dto';
 
 export class GetCustomerDto extends CustomerDto {

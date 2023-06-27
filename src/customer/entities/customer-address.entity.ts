@@ -17,8 +17,22 @@ export class CustomerAddress {
     @Column()
         address_type: number;
     @ManyToOne(() => Customer, (customer) => customer.customer_address )
+    @JoinColumn(
+    {
+        name: 'customer_id',
+        referencedColumnName: "id" ,
+        foreignKeyConstraintName: "fk_customer_index_address"
+    })
         customer: CustomerAddress[];
-    @OneToOne(() => CustomerAddressDetails, { cascade: true })
-    @JoinColumn()
+    @OneToOne(() => CustomerAddressDetails, (address_details) => address_details.id, { 
+        cascade: true,
+        eager: true,
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+    })
+    @JoinColumn({
+        name: 'address_details_id',
+        foreignKeyConstraintName: "fk_address_index_details"
+    })
         address_details: CustomerAddressDetails
 }

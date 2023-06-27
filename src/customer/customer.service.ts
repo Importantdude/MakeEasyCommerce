@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { UpdateCustomerAddressDto, UpdateCustomerDto } from './dto/update-customer.dto';
 import { DefaultOrderCustomerAddressDto, DefaultOrderCustomerDto, DefaultOrderCustomerAddressDetailsDto } from './dto/enum/enum-customer.dto';
 import { GetAddressDetailsDto, GetCustomerAddressDto, GetCustomerDto } from './dto/get-customer.dto';
 import { AddressDetailsDto, AddressDto } from './dto/address/customer-address.dto';
-import { EntityManager, Repository } from 'typeorm';
+import { Any, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Customer } from './entities/customer.entity';
 import { CustomerAddressDetails } from './entities/customer-address-detailed.entity';
 import { CustomerAddress } from './entities/customer-address.entity';
+import { of } from 'rxjs';
 
 @Injectable()
 export class CustomerService {
@@ -24,6 +25,10 @@ export class CustomerService {
     private readonly entityManager: EntityManager
 	) {}
 
+
+  // Requires to rebuild approach for saving entity 
+  // from multiple calls ".save" to QueryBuilder
+  // Reference inside create function
   async create(createCustomerDto: CreateCustomerDto): Promise<GetCustomerDto> {
     // const alreadyExists = await this.findOneBy(createCustomerDto.email, '', '');
 
@@ -43,7 +48,6 @@ export class CustomerService {
       if(createCustomerDto.customer_address){
 
         for(const address of createCustomerDto.customer_address){
-        // createCustomerDto.customer_address.map( async (address) => {
           const customerAddress = new CustomerAddress();
           const customerAddressDetails = new CustomerAddressDetails()
           let details: CustomerAddressDetails;
@@ -66,7 +70,7 @@ export class CustomerService {
       
           addressRes.push(await this.customerAddressRepository.save(customerAddress));
         }
-        console.log(addressRes);
+
         customer.customer_address = addressRes;
         return await this.customerRepository.save(customer);
 
@@ -74,7 +78,14 @@ export class CustomerService {
 
       const partialCustomerData = await this.customerRepository.save(customer);
 
-      console.log(addressRes);
+      // INVESTIGATE
+      // return await this.customerRepository
+      //           .createQueryBuilder()
+      //           .relation(Customer,'customer_address')
+      //           .relation(CustomerAddress,'address_details')
+      //           .of(customer)
+      //           .add(customer)
+
       return {
         id: partialCustomerData.id,
         first_name: partialCustomerData.first_name,
@@ -90,9 +101,11 @@ export class CustomerService {
   }
 
   async findAll(): Promise<GetCustomerDto[]> {
-    return this.entityManager.find(Customer, {
-      relations: ['customer_address','customer_address.address_details']
-    })
+    return await this.customerRepository
+    .createQueryBuilder('customer')
+    .leftJoinAndSelect('customer.customer_address','customer_address')
+    .leftJoinAndSelect('customer_address.address_details','address_details')
+    .getMany()
   }
 
   async findOne(id: number): Promise<GetCustomerDto> {
@@ -151,11 +164,62 @@ export class CustomerService {
     }
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+  async update(customer_id: number, updateCustomerDto: UpdateCustomerDto): Promise<GetCustomerDto> {
+    const partialEntityCustomer : UpdateCustomerDto = {
+      id: customer_id,
+      ...updateCustomerDto
+    }
+
+    const customer : UpdateCustomerDto = await this.entityManager.preload(Customer, partialEntityCustomer);
+    
+    const res =[];
+    if(this.entityManager.hasId(customer)){
+      res.push(this.entityManager.getId(customer));
+    }  
+    console.log(res);
+    try {
+      return {
+        customer_address: await this.updateCustomerAddress(customer_id, updateCustomerDto.customer_address),
+        ...(await this.customerRepository
+        .createQueryBuilder()
+        .update(Customer)
+        .set(customer)
+        .execute()
+        ).raw
+      }
+    } catch (e) {
+      return e.message;
+    }
+      
   }
 
-  remove(id: number) {
+  async updateCustomerAddress(customer_id: number, updateCustomerAddress: UpdateCustomerAddressDto[] ): Promise<GetCustomerAddressDto[]> {
+    const addresses : GetCustomerAddressDto[] = [];
+    
+    try{
+      for(const address of updateCustomerAddress){
+        const reduced_index = (updateCustomerAddress.length - addresses.length) * - 1;
+        addresses.push(await this.entityManager.preload(CustomerAddress, address));
+      }
+    } catch (e) {
+      return e.message;
+    }
+
+    return await this.customerAddressRepository.save(addresses);
+  }
+
+  async remove(id: number) {
     return `This action removes a #${id} customer`;
   }
 }
+// const customer_address = await this.entityManager
+//   .createQueryBuilder(CustomerAddress, 'customer_address')
+//   .leftJoinAndSelect('customer_address.customer', 'customer')
+//   .where( "customer_address.customer_id = :customer_id", { customer_id: customer_id } )
+//   .getMany()
+// for(let address of customer_address){
+//   console.log(address.id);
+//   console.log(updateCustomerAddress.filter( (customer_address) => customer_address.address_details.id == address.id ));
+//   console.log(123);
+//   address.address_details = updateCustomerAddress.filter( (customer_address) => customer_address.address_details.id == address.id ).shift().address_details
+// }
