@@ -1,0 +1,2 @@
+https://doug-martin.github.io/nestjs-query/ -> investigate the goal in first place was to have similar approach
+https://orkhan.gitbook.io/typeorm/docs/listeners-and-subscribers -> share with Bas

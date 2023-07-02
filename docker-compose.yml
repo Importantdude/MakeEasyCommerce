@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+    commerce_db:
+        image: postgres
+        env_file: .env
+        environment:
+            POSTGRES_DB: ${TYPEORM_DATABASE}
+            POSTGRES_USER: ${TYPEORM_USERNAME}
+            POSTGRES_PASSWORD: ${TYPEORM_PASSWORD}
+        ports:
+            - "5432:5432"
     commerce_sys:
         env_file: .env
         build: .
@@ -9,7 +18,7 @@ services:
             - .:/code
         ports:
             - "${API_PORT}:${API_PORT}"
-            - "9232:9232"
+            - "9229:9229"
 networks:
     default:
         name: api
