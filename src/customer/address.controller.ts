@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CustomerService } from './customer.service';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { GetCustomerAddressDto, GetCustomerAddressShortDto, GetCustomerDto, GetCustomerShortDto } from './dto/get-customer.dto';
+import { UpdateAddressDto } from './dto/update-customer.dto';
 
 @ApiTags('Address')
 @Controller('address')
@@ -45,12 +46,20 @@ export class AddressController {
     return await this.customerService.findAllDetailedAddresses();
   }
 
-  // @Patch('update/:id')
-	// @ApiOperation({ summary: 'Update Customer', description: 'Update customer' })
-	// @ApiBody({ type: UpdateCustomerDto, description: 'customer', required: true })
-  // async update(@Param('id') id: string, @Body() updateCustomerDto: UpdateCustomerDto): Promise<GetCustomerDto> {
-  //   return await this.customerService.update(+id, updateCustomerDto);
-  // }
+  @Get('get/defaultAddress')
+	@ApiOperation({ summary: 'Default Address', description: 'Idea was to fetch default (enum) hardcoded address data' })
+	@ApiOkResponse({ description: 'Default Address Dto', type: GetCustomerAddressDto })
+  async getDefaultCustomerAddress(): Promise<GetCustomerAddressDto> {
+    return this.customerService.getDefaultCustomerAddress();
+  }
+
+  @Patch('update')
+	@ApiOperation({ summary: 'Update Address', description: 'Update address' })
+	@ApiBody({ type: [UpdateAddressDto], description: 'address', required: true })
+	@ApiOkResponse({ description: 'Address Dto', type: [GetCustomerAddressDto] })
+  async updateCustomerAddress(@Body() updateAddressDto: UpdateAddressDto[]): Promise<GetCustomerAddressDto[]> {
+    return await this.customerService.updateCustomerAddress(updateAddressDto);
+  }
 
   // @Patch('update/address')
   // @ApiOperation({ summary: 'Update Customer Address', description: 'Update customer address' })

@@ -77,6 +77,7 @@ export class CustomerService {
     return null;
   }
 
+  // Customer
   async findOneShort(id: number): Promise<GetCustomerShortDto> {
     return this.entityManager.findOneOrFail(Customer, {
       where: { id: id }
@@ -108,6 +109,9 @@ export class CustomerService {
     .getMany()
   }
 
+  // Address
+  // Maybe I'll export it to another file
+  // Maybe
   async findOneAddressShort(id: number): Promise<GetCustomerAddressShortDto> {
     return await this.entityManager
       .createQueryBuilder(CustomerAddress, 'customer_address')
@@ -136,6 +140,7 @@ export class CustomerService {
     .getMany()
   }
 
+  // Update Customer
   async update(customer_id: number, updateCustomerDto: UpdateCustomerDto): Promise<GetCustomerDto> {
     const partialEntityCustomer : UpdateCustomerDto = {
       id: customer_id,
@@ -164,23 +169,23 @@ export class CustomerService {
       
   }
 
+  // Update Address and it's details
   async updateCustomerAddress(updateCustomerAddress: UpdateCustomerAddressDto[] ): Promise<GetCustomerAddressDto[]> {
     const addresses : GetCustomerAddressDto[] = [];
 
     try{
       for(const address of updateCustomerAddress){
-        // addresses.push(await this.entityManager.preload(CustomerAddress, address));
         addresses.push((await this.customerAddressRepository.update(address.id, address)).raw)
       }
 
       return addresses;
-      // return (await this.customerAddressRepository.update(address_id, addresses)).raw;
 
     } catch (e) {
       return e.message;
     }
   }
 
+  // Remove Customer
   async remove(id: number) {
     return `This action removes a #${id} customer`;
   }
