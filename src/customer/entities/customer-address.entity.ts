@@ -17,6 +17,7 @@ export class CustomerAddress {
     @Column()
         address_type: number;
     @ManyToOne(() => Customer, (customer) => customer.customer_address, { onDelete: 'CASCADE' })
+    // Investigate
     // @JoinColumn(
     // {
     //     name: 'customer_id',

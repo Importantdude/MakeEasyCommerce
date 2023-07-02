@@ -1,13 +1,16 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { GetCustomerAddressDto, GetCustomerAddressShortDto, GetCustomerDto, GetCustomerShortDto } from './dto/get-customer.dto';
+import { GetCustomerAddressDto, GetCustomerAddressShortDto } from './dto/get-customer.dto';
 import { UpdateAddressDto } from './dto/update-customer.dto';
 
 @ApiTags('Address')
 @Controller('address')
 export class AddressController {
   constructor(private readonly customerService: CustomerService) {}
+
+  // This needs to be rebuild for post request
+  // to create address outside customer entity
 
   // @Post('new')
 	// @ApiOperation({ summary: 'Create Customer', description: 'Create customer' })
@@ -72,22 +75,4 @@ export class AddressController {
   removeAddress(@Param('id') id: string) {
     return this.customerService.removeAddress(+id);
   }
-
-
-  // @Patch('update/address')
-  // @ApiOperation({ summary: 'Update Customer Address', description: 'Update customer address' })
-	// @ApiBody({ type: [UpdateCustomerAddressDto], description: 'customer_address', required: true })
-  // async updateCustomerAddress(@Body() updateCustomerAddressDto: UpdateCustomerAddressDto[]): Promise<GetCustomerAddressDto[]> {
-  //   return await this.customerService.updateCustomerAddress(updateCustomerAddressDto);
-  // }
-
-  // @Delete('/delete/:id')
-  // remove(@Param('id') id: string) {
-  //   return this.customerService.remove(+id);
-  // }
-
-  // @Delete('/delete/:id')
-  // removeAddress(@Param('id') id: string) {
-  //   return this.customerService.remove(+id);
-  // }
 }
