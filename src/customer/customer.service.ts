@@ -13,12 +13,12 @@ import { CustomerAddress } from './entities/customer-address.entity';
 export class CustomerService {
 
 	constructor(
-		@InjectRepository(Customer)
-		private readonly customerRepository: Repository<Customer>,
-		@InjectRepository(CustomerAddress)
-		private readonly customerAddressRepository: Repository<CustomerAddress>,
-		@InjectRepository(CustomerAddressDetails)
-    private readonly customerAddressDetailsRepository: Repository<CustomerAddressDetails>,
+		// @InjectRepository(Customer)
+		// private readonly customerRepository: Repository<Customer>,
+		// @InjectRepository(CustomerAddress)
+		// private readonly customerAddressRepository: Repository<CustomerAddress>,
+		// @InjectRepository(CustomerAddressDetails)
+    // private readonly customerAddressDetailsRepository: Repository<CustomerAddressDetails>,
     @InjectEntityManager()
     private readonly entityManager: EntityManager
 	) {}
@@ -60,18 +60,22 @@ export class CustomerService {
             customerAddressDetails.house_number = address.address_details.house_number;
             customerAddressDetails.company = address.address_details.company;
             customerAddressDetails.tax_id = address.address_details.tax_id;
-            details = await this.customerAddressDetailsRepository.save(customerAddressDetails); 
+            details = await this.entityManager.save(CustomerAddressDetails, customerAddressDetails);
+            // details = await this.customerAddressDetailsRepository.save(customerAddressDetails); 
           }
           customerAddress.address_details = details;
       
-          addressRes.push(await this.customerAddressRepository.save(customerAddress));
+          addressRes.push(await this.entityManager.save(CustomerAddress, customerAddress))
+          // addressRes.push(await this.customerAddressRepository.save(customerAddress));
         }
 
         customer.customer_address = addressRes;
-        return await this.customerRepository.save(customer);
+        return await this.entityManager.save(Customer, customer);
+        // return await this.customerRepository.save(customer);
       }
 
-      return await this.customerRepository.save(customer);
+      return await this.entityManager.save(Customer, customer);
+      // return await this.customerRepository.save(customer);
     }
     
     return null;
@@ -94,16 +98,16 @@ export class CustomerService {
   }
 
   async findAllCustomers(): Promise<GetCustomerShortDto[]> {
-    return await this.customerRepository
-    .createQueryBuilder()
+    return await this.entityManager
+    .createQueryBuilder(Customer, 'customer')
     // .leftJoinAndSelect('customer.customer_address','customer_address')
     .getMany()
 
   }
 
   async findAllDetailedCustomers(): Promise<GetCustomerDto[]> {
-    return await this.customerRepository
-    .createQueryBuilder('customer')
+    return await this.entityManager
+    .createQueryBuilder(Customer, 'customer')
     .leftJoinAndSelect('customer.customer_address','customer_address')
     .leftJoinAndSelect('customer_address.address_details','address_details')
     .getMany()
@@ -128,14 +132,14 @@ export class CustomerService {
   }
 
   async findAllAddresses(): Promise<GetCustomerAddressShortDto[]> {
-    return await this.customerAddressRepository
-    .createQueryBuilder('customer_address')
+    return await this.entityManager
+    .createQueryBuilder(CustomerAddress, 'customer_address')
     .getMany()
   }
   
   async findAllDetailedAddresses(): Promise<GetCustomerAddressDto[]> {
-    return await this.customerAddressRepository
-    .createQueryBuilder('customer_address')
+    return await this.entityManager
+    .createQueryBuilder(CustomerAddress, 'customer_address')
     .leftJoinAndSelect('customer_address.address_details','address_details')
     .getMany()
   }
@@ -153,7 +157,7 @@ export class CustomerService {
     try {
       return {
         customer_address: await this.updateCustomerAddress(updateCustomerDto.customer_address),
-        ...await this.customerRepository.save(customer)
+        ...await this.entityManager.save(Customer, customer)
       }
     } catch (e) {
       return e.message;
@@ -164,7 +168,7 @@ export class CustomerService {
   // Update Address and it's details
   async updateOneCustomerAddress(id: number, updateCustomerAddress: UpdateCustomerAddressDto ): Promise<GetCustomerAddressDto> {
     try{
-      return (await this.customerAddressRepository.update(id, updateCustomerAddress)).raw;
+      return (await this.entityManager.update(CustomerAddress, id, updateCustomerAddress)).raw;
     } catch (e) {
       return e.message;
     }
@@ -176,7 +180,7 @@ export class CustomerService {
 
     try{
       for(const address of updateCustomerAddress){
-        addresses.push((await this.customerAddressRepository.update(address.id, address)).raw)
+        addresses.push((await this.entityManager.update(CustomerAddress, address.id, address)).raw)
       }
 
       return addresses;
@@ -189,7 +193,7 @@ export class CustomerService {
   // Remove Customer
   async remove(id: number) {
     const customer: GetCustomerDto = await this.findOne(id);
-    const CustomerAddress: GetAddressCustomerDto[] = customer.customer_address.map( (address) => {
+    const customer_address: GetAddressCustomerDto[] = customer.customer_address.map( (address) => {
       if(address.address_details.id != null){
         return {
           customer: customer,
@@ -201,7 +205,7 @@ export class CustomerService {
 
     try{
 
-      const removed_customer = (await this.entityManager.delete(Customer, CustomerAddress)).affected;
+      const removed_customer = (await this.entityManager.delete(Customer, customer)).affected;
 
       if(removed_customer < 1){
         return 'Something went wrong';
@@ -226,7 +230,7 @@ export class CustomerService {
   // Remove Customer
   async removeAddress(id: number) {
     try{
-      return (await this.customerAddressDetailsRepository.delete(id)).affected
+      return (await this.entityManager.delete(CustomerAddressDetails, id)).affected
     }catch(e){
       return e.message;
     }
@@ -237,7 +241,7 @@ export class CustomerService {
     let affected = 0;
     try{
       for(const address of getCustomerAddressDto){
-        affected += (await this.customerAddressDetailsRepository.delete(address.address_details.id)).affected
+        affected += (await this.entityManager.delete(CustomerAddressDetails, address.address_details.id)).affected
       }
 
       return affected;
