@@ -1,5 +1,5 @@
 import { IsEmail, IsNumber, IsString } from "class-validator";
-import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { CustomerAddress } from "./customer-address.entity";
 
 @Entity()
@@ -20,8 +20,8 @@ export class Customer {
     @Column()
         store_id: number;
     @OneToMany(() => CustomerAddress, (customer_address) => customer_address.customer, { 
-        cascade: true,
-        eager: true,
+        // cascade: true,
+        // eager: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     })

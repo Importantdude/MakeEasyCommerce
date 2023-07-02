@@ -4,9 +4,7 @@ import {
 	IsOptional,
 	ValidateNested,
 	IsNumber,
-	IsNotEmpty,
-	IsEmail,
-	IsArray
+	IsNotEmpty
 } from 'class-validator';
 
 export class AddressDetailsDto {
@@ -36,7 +34,7 @@ export class AddressDetailsDto {
 		tax_id: string;
 }
 
-export class AddressDto {
+export class AddressShortDto {
 	@IsString()
     @IsNotEmpty()
 	@ApiProperty()
@@ -49,10 +47,11 @@ export class AddressDto {
 	@IsNotEmpty()
 	@ApiProperty()
 		address_type: number;
+}
+
+export class AddressDto extends (AddressShortDto) {
 	@IsNotEmpty()
 	@ApiProperty({ type: () => AddressDetailsDto })
 	@ValidateNested()
 		address_details: AddressDetailsDto
 }
-
-

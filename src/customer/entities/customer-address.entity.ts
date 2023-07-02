@@ -1,4 +1,4 @@
-import { IsEmail, IsNumber, IsString } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Customer } from "./customer.entity";
 import { CustomerAddressDetails } from "./customer-address-detailed.entity";
@@ -17,16 +17,16 @@ export class CustomerAddress {
     @Column()
         address_type: number;
     @ManyToOne(() => Customer, (customer) => customer.customer_address )
-    @JoinColumn(
-    {
-        name: 'customer_id',
-        referencedColumnName: "id" ,
-        foreignKeyConstraintName: "fk_customer_index_address"
-    })
+    // @JoinColumn(
+    // {
+    //     name: 'customer_id',
+    //     referencedColumnName: "id" ,
+    //     foreignKeyConstraintName: "fk_customer_index_address"
+    // })
         customer: CustomerAddress[];
     @OneToOne(() => CustomerAddressDetails, (address_details) => address_details.id, { 
-        cascade: true,
-        eager: true,
+        // cascade: true,
+        // eager: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     })

@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { CustomerDto } from './create-customer.dto';
 import { IsNotEmpty, IsNumber, IsOptional, ValidateNested } from 'class-validator';
 import { AddressDetailsDto, AddressDto } from './address/customer-address.dto';
