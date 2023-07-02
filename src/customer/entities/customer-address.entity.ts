@@ -16,7 +16,7 @@ export class CustomerAddress {
     @IsNumber()
     @Column()
         address_type: number;
-    @ManyToOne(() => Customer, (customer) => customer.customer_address )
+    @ManyToOne(() => Customer, (customer) => customer.customer_address, { onDelete: 'CASCADE' })
     // @JoinColumn(
     // {
     //     name: 'customer_id',
@@ -25,8 +25,8 @@ export class CustomerAddress {
     // })
         customer: CustomerAddress[];
     @OneToOne(() => CustomerAddressDetails, (address_details) => address_details.id, { 
-        // cascade: true,
-        // eager: true,
+        cascade: true,
+        eager: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     })

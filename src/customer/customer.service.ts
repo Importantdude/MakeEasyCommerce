@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerAddressDto, UpdateCustomerDto } from './dto/update-customer.dto';
 import { DefaultOrderCustomerAddressDto, DefaultOrderCustomerDto, DefaultOrderCustomerAddressDetailsDto } from './dto/enum/enum-customer.dto';
-import { GetCustomerAddressDto, GetCustomerAddressShortDto, GetCustomerDto, GetCustomerShortDto } from './dto/get-customer.dto';
+import { GetAddressCustomerDto, GetAddressDetailsDto, GetCustomerAddressDto, GetCustomerAddressShortDto, GetCustomerDto, GetCustomerShortDto } from './dto/get-customer.dto';
 import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Customer } from './entities/customer.entity';
@@ -148,15 +148,7 @@ export class CustomerService {
       ...updateCustomerDto
     }
 
-    const addressbefore = await this.updateCustomerAddress(updateCustomerDto.customer_address);
     const customer : GetCustomerShortDto = await this.entityManager.preload(Customer, partialEntityCustomer);
-    console.log('customer');
-    console.log(customer);
-    console.log('addressbefore');
-    console.log(addressbefore);
-
-    // const addressafter = await this.updateCustomerAddress(updateCustomerDto.customer_address);
-    // const address_updated = await this.updateCustomerAddress(updateCustomerDto.customer_address);
 
     try {
       return {
@@ -170,6 +162,15 @@ export class CustomerService {
   }
 
   // Update Address and it's details
+  async updateOneCustomerAddress(id: number, updateCustomerAddress: UpdateCustomerAddressDto ): Promise<GetCustomerAddressDto> {
+    try{
+      return (await this.customerAddressRepository.update(id, updateCustomerAddress)).raw;
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  // Update Many Address and it's details
   async updateCustomerAddress(updateCustomerAddress: UpdateCustomerAddressDto[] ): Promise<GetCustomerAddressDto[]> {
     const addresses : GetCustomerAddressDto[] = [];
 
@@ -187,7 +188,63 @@ export class CustomerService {
 
   // Remove Customer
   async remove(id: number) {
-    return `This action removes a #${id} customer`;
+    const customer: GetCustomerDto = await this.findOne(id);
+    const CustomerAddress: GetAddressCustomerDto[] = customer.customer_address.map( (address) => {
+      if(address.address_details.id != null){
+        return {
+          customer: customer,
+          address_details: address.address_details,
+          ...address
+        }
+      }
+    })
+
+    try{
+
+      const removed_customer = (await this.entityManager.delete(Customer, CustomerAddress)).affected;
+
+      if(removed_customer < 1){
+        return 'Something went wrong';
+      }
+
+      const removed_details = await this.deleteCustomerAddresses(customer.customer_address);
+
+      if(removed_details < 1){
+        return 'Customer was successfully removed';
+      }
+
+      return {
+        customer_id: id, 
+        message: 'Customer was successfully removed including data related to it'
+      };
+
+    }catch(e){
+      return e.message;
+    }
+  }
+
+  // Remove Customer
+  async removeAddress(id: number) {
+    try{
+      return (await this.customerAddressDetailsRepository.delete(id)).affected
+    }catch(e){
+      return e.message;
+    }
+  }
+
+  // Delete Many Addresses and it's details
+  async deleteCustomerAddresses(getCustomerAddressDto: GetCustomerAddressDto[] ): Promise<number> {
+    let affected = 0;
+    try{
+      for(const address of getCustomerAddressDto){
+        affected += (await this.customerAddressDetailsRepository.delete(address.address_details.id)).affected
+      }
+
+      return affected;
+
+    } catch(e) {
+      return e.message;
+    }
   }
 
   // For future development related to 

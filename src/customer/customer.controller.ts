@@ -61,13 +61,8 @@ export class CustomerController {
     return await this.customerService.update(+id, updateCustomerDto);
   }
 
-  @Delete('/delete/:id')
+  @Delete('delete/:id')
   remove(@Param('id') id: string) {
-    return this.customerService.remove(+id);
-  }
-
-  @Delete('/delete/address/:id')
-  removeAddress(@Param('id') id: string) {
     return this.customerService.remove(+id);
   }
 }

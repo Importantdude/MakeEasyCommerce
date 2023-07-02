@@ -1,5 +1,6 @@
 import { IsString } from "class-validator";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { CustomerAddress } from "./customer-address.entity";
 
 @Entity()
 export class CustomerAddressDetails {
@@ -23,4 +24,9 @@ export class CustomerAddressDetails {
     @IsString()
     @Column()
         tax_id: string;
+    @OneToOne(() => CustomerAddress, (customer_address) => customer_address.id, { 
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+    })
+        customer_address: CustomerAddress
 }

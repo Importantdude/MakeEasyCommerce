@@ -50,3 +50,9 @@ export class GetCustomerShortDto extends (CustomerDto) {
 		id: number;
 }
 
+export class GetAddressCustomerDto extends (GetCustomerAddressDto) {
+	@IsNotEmpty()
+	@ApiProperty({ type: () => GetCustomerShortDto })
+		customer: GetCustomerShortDto
+}
+

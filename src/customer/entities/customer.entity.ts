@@ -20,7 +20,7 @@ export class Customer {
     @Column()
         store_id: number;
     @OneToMany(() => CustomerAddress, (customer_address) => customer_address.customer, { 
-        // cascade: true,
+        cascade: true,
         // eager: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
