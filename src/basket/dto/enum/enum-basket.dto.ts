@@ -1,4 +1,4 @@
 export enum DefaultOrderBasketDto {
     basket_id = 1,
-    basket_total_price = 100.00,
+    basket_total_price = 100.0,
 }

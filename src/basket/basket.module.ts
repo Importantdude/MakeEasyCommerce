@@ -3,7 +3,7 @@ import { BasketService } from './basket.service';
 import { BasketController } from './basket.controller';
 
 @Module({
-  controllers: [BasketController],
-  providers: [BasketService]
+    controllers: [BasketController],
+    providers: [BasketService],
 })
 export class BasketModule {}

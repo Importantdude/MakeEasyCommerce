@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+} from '@nestjs/common';
 import { BasketService } from './basket.service';
 import { CreateBasketDto } from './dto/create-basket.dto';
 import { UpdateBasketDto } from './dto/update-basket.dto';
@@ -8,37 +16,40 @@ import { GetBasketDto } from './dto/get-basket.dto';
 @ApiTags('Basket')
 @Controller('basket')
 export class BasketController {
-  constructor(private readonly basketService: BasketService) {}
+    constructor(private readonly basketService: BasketService) {}
 
-  @Post()
-  create(@Body() createBasketDto: CreateBasketDto) {
-    return this.basketService.create(createBasketDto);
-  }
+    @Post()
+    create(@Body() createBasketDto: CreateBasketDto) {
+        return this.basketService.create(createBasketDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.basketService.findAll();
-  }
-  
-  @Get('defaultBasket')
-	@ApiOperation({ summary: 'Default Basket', description: 'Idea is to fetch default (enum) hardcoded Basket data' })
-	@ApiOkResponse({ description: 'Default Basket Dto', type: GetBasketDto })
-  getDefaultBasket() {
-    return this.basketService.getDefaultBasket();
-  }
+    @Get()
+    findAll() {
+        return this.basketService.findAll();
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.basketService.findOne(+id);
-  }
+    @Get('defaultBasket')
+    @ApiOperation({
+        summary: 'Default Basket',
+        description: 'Idea is to fetch default (enum) hardcoded Basket data',
+    })
+    @ApiOkResponse({ description: 'Default Basket Dto', type: GetBasketDto })
+    getDefaultBasket() {
+        return this.basketService.getDefaultBasket();
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBasketDto: UpdateBasketDto) {
-    return this.basketService.update(+id, updateBasketDto);
-  }
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.basketService.findOne(+id);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.basketService.remove(+id);
-  }
+    @Patch(':id')
+    update(@Param('id') id: string, @Body() updateBasketDto: UpdateBasketDto) {
+        return this.basketService.update(+id, updateBasketDto);
+    }
+
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.basketService.remove(+id);
+    }
 }

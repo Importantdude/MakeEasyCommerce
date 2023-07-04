@@ -4,23 +4,23 @@ import { UpdateAttributeDto } from './dto/update-attribute.dto';
 
 @Injectable()
 export class AttributesService {
-  create(createAttributeDto: CreateAttributeDto) {
-    return 'This action adds a new attribute';
-  }
+    create(createAttributeDto: CreateAttributeDto) {
+        return 'This action adds a new attribute';
+    }
 
-  findAll() {
-    return `This action returns all attributes`;
-  }
+    findAll() {
+        return `This action returns all attributes`;
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} attribute`;
-  }
+    findOne(id: number) {
+        return `This action returns a #${id} attribute`;
+    }
 
-  update(id: number, updateAttributeDto: UpdateAttributeDto) {
-    return `This action updates a #${id} attribute`;
-  }
+    update(id: number, updateAttributeDto: UpdateAttributeDto) {
+        return `This action updates a #${id} attribute`;
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} attribute`;
-  }
+    remove(id: number) {
+        return `This action removes a #${id} attribute`;
+    }
 }

@@ -1,0 +1,97 @@
+{
+    "first_name": "Customer 2",
+    "last_name": "Customer Last Name",
+    "email": "customer2@mec.com",
+    "store_id": 10,
+    "customer_address": 
+    [
+        {
+            "country": "United States",
+            "postal_code": "QQ-1234",
+            "address_type": 2,
+            "address_details": {
+                "city": "DC",
+                "street_name": "Roosevelt",
+                "house_number": "10",
+                "phone_number": "898989",
+                "company": "some Company",
+                "tax_id": "1234"
+            }
+        },
+        {
+            "country": "United States",
+            "postal_code": "QQ-1234",
+            "address_type": 2,
+            "address_details": {
+                "city": "Alaska",
+                "street_name": "some cold street",
+                "house_number": "15",
+                "phone_number": "898989",
+                "company": "some Company",
+                "tax_id": "1234"
+            }
+        },
+        {
+            "country": "Germany",
+            "postal_code": "AA-1234",
+            "address_type": 2,
+            "address_details": {
+                "city": "Berlin",
+                "street_name": "some beer street",
+                "house_number": "15",
+                "phone_number": "05055055",
+                "company": "some Wurst",
+                "tax_id": "0000"
+            }
+        }
+    ]
+}
+
+{
+    "first_name": "Daniel",
+    "last_name": "Daniel Last Name",
+    "email": "daniel@mec.com",
+    "store_id": 10,
+    "customer_address": 
+    [
+        {
+            "country": "United States",
+            "postal_code": "QQ-1234",
+            "address_type": 2,
+            "address_details": {
+                "city": "DC",
+                "street_name": "Roosevelt",
+                "house_number": "10",
+                "phone_number": "898989",
+                "company": "some Company",
+                "tax_id": "1234"
+            }
+        },
+        {
+            "country": "United States",
+            "postal_code": "QQ-1234",
+            "address_type": 2,
+            "address_details": {
+                "city": "Alaska",
+                "street_name": "some cold street",
+                "house_number": "15",
+                "phone_number": "898989",
+                "company": "some Company",
+                "tax_id": "1234"
+            }
+        },
+        {
+            "country": "Germany",
+            "postal_code": "AA-1234",
+            "address_type": 2,
+            "address_details": {
+                "city": "Berlin",
+                "street_name": "some beer street",
+                "house_number": "15",
+                "phone_number": "05055055",
+                "company": "some Wurst",
+                "tax_id": "0000"
+            }
+        }
+    ]
+}
