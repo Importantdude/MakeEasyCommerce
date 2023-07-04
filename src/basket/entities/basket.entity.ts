@@ -1,7 +1,5 @@
-import { Customer } from '@src/customer/entities/customer.entity';
-import { Product } from '@src/product/entities/product.entity';
 import { IsNumber } from 'class-validator';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Basket {
@@ -21,14 +19,12 @@ export class Basket {
     basket_final_price: number;
 
     // Many Products can be assigned to basket
-    // @OneToMany(() => Product, (product) => product.id)
     @Column('simple-array')
     product_ids: number[];
 
     // Customer represented as array
     // due to feature of splitted order
     // where one order has two customers
-    // @OneToMany(() => Customer, (customer) => customer.id, {
     @Column('simple-array')
     customer_ids: number[];
 }

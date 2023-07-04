@@ -1,7 +1,5 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { GetBasketCustomerDto } from '@src/customer/dto/get-customer.dto';
-import { GetBasketProductDto } from '@src/product/dto/get-product.dto';
-import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class BasketDto {
     @IsNumber()
