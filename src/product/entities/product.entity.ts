@@ -1,6 +1,5 @@
-import { IsDecimal, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
-import { ProductVisibilityType } from '../dto/enum/enum-product.dto';
 
 @Entity()
 @Unique(['sku'])
