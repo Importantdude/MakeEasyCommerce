@@ -1,58 +1,57 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-	ValidateNested,
-	IsNumber,
-	IsNotEmpty
-} from 'class-validator';
+import { ValidateNested, IsNumber, IsNotEmpty } from 'class-validator';
 import { CustomerDto } from './create-customer.dto';
-import { AddressDetailsDto, AddressDto, AddressShortDto } from './address/customer-address.dto';
+import {
+    AddressDetailsDto,
+    AddressDto,
+    AddressShortDto,
+} from './address/customer-address.dto';
 
-export class GetCustomerDto extends (CustomerDto) {
-	@IsNumber()
+export class GetCustomerDto extends CustomerDto {
+    @IsNumber()
     @IsNotEmpty()
-	@ApiProperty()
-		id: number;
-	@IsNotEmpty()
-	@ApiProperty({ type: () => [GetCustomerAddressDto] })
-	@ValidateNested()
-		customer_address : GetCustomerAddressDto[]
-}
-
-export class GetAddressDetailsDto extends (AddressDetailsDto){
-	@IsNumber()
-	@IsNotEmpty()
-	@ApiProperty()
-		id: number;
-}
-
-export class GetCustomerAddressDto extends (AddressDto) {
-	@IsNumber()
+    @ApiProperty()
+    id: number;
     @IsNotEmpty()
-	@ApiProperty()
-		id: number;
-	@IsNotEmpty()
-	@ApiProperty({ type: () => GetAddressDetailsDto })
-	@ValidateNested()
-		address_details: GetAddressDetailsDto
+    @ApiProperty({ type: () => [GetCustomerAddressDto] })
+    @ValidateNested()
+    customer_address: GetCustomerAddressDto[];
 }
 
-export class GetCustomerAddressShortDto extends (AddressShortDto) {
-	@IsNumber()
+export class GetAddressDetailsDto extends AddressDetailsDto {
+    @IsNumber()
     @IsNotEmpty()
-	@ApiProperty()
-		id: number;
+    @ApiProperty()
+    id: number;
 }
 
-export class GetCustomerShortDto extends (CustomerDto) {
-	@IsNumber()
+export class GetCustomerAddressDto extends AddressDto {
+    @IsNumber()
     @IsNotEmpty()
-	@ApiProperty()
-		id: number;
+    @ApiProperty()
+    id: number;
+    @IsNotEmpty()
+    @ApiProperty({ type: () => GetAddressDetailsDto })
+    @ValidateNested()
+    address_details: GetAddressDetailsDto;
 }
 
-export class GetAddressCustomerDto extends (GetCustomerAddressDto) {
-	@IsNotEmpty()
-	@ApiProperty({ type: () => GetCustomerShortDto })
-		customer: GetCustomerShortDto
+export class GetCustomerAddressShortDto extends AddressShortDto {
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    id: number;
 }
 
+export class GetCustomerShortDto extends CustomerDto {
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    id: number;
+}
+
+export class GetAddressCustomerDto extends GetCustomerAddressDto {
+    @IsNotEmpty()
+    @ApiProperty({ type: () => GetCustomerShortDto })
+    customer: GetCustomerShortDto;
+}

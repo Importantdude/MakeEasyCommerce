@@ -1,3 +1,3 @@
-import { OrderDto } from "./create-order.dto";
+import { OrderDto } from './create-order.dto';
 
 export class GetOrderDto extends OrderDto {}

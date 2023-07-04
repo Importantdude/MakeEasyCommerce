@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+} from '@nestjs/common';
 import { AttributesService } from './attributes.service';
 import { CreateAttributeDto } from './dto/create-attribute.dto';
 import { UpdateAttributeDto } from './dto/update-attribute.dto';
@@ -7,30 +15,33 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('Attributes')
 @Controller('attributes')
 export class AttributesController {
-  constructor(private readonly attributesService: AttributesService) {}
+    constructor(private readonly attributesService: AttributesService) {}
 
-  @Post()
-  create(@Body() createAttributeDto: CreateAttributeDto) {
-    return this.attributesService.create(createAttributeDto);
-  }
+    @Post()
+    create(@Body() createAttributeDto: CreateAttributeDto) {
+        return this.attributesService.create(createAttributeDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.attributesService.findAll();
-  }
+    @Get()
+    findAll() {
+        return this.attributesService.findAll();
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.attributesService.findOne(+id);
-  }
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.attributesService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAttributeDto: UpdateAttributeDto) {
-    return this.attributesService.update(+id, updateAttributeDto);
-  }
+    @Patch(':id')
+    update(
+        @Param('id') id: string,
+        @Body() updateAttributeDto: UpdateAttributeDto,
+    ) {
+        return this.attributesService.update(+id, updateAttributeDto);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.attributesService.remove(+id);
-  }
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.attributesService.remove(+id);
+    }
 }

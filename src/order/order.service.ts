@@ -8,44 +8,38 @@ import { CustomerService } from 'src/customer/customer.service';
 
 @Injectable()
 export class OrderService {
+    constructor() {} // private readonly customerService: CustomerService // private readonly basketService: BasketService,
 
-  constructor(
-    // private readonly basketService: BasketService,
-    // private readonly customerService: CustomerService
-  ){}
+    create(createOrderDto: CreateOrderDto) {
+        return 'This action adds a new order';
+    }
 
-  create(createOrderDto: CreateOrderDto) {
-    return 'This action adds a new order';
-  }
+    findAll() {
+        return `This action returns all order`;
+    }
 
-  findAll() {
-    return `This action returns all order`;
-  }
+    findOne(id: number) {
+        return `This action returns a #${id} order`;
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
-  }
+    async getDefaultOrder(): Promise<GetOrderDto> {
+        // const basket = await this.basketService.getDefaultBasket();
+        // const address = await this.customerService.getDefaultCustomerAddress();
 
-  
-  async getDefaultOrder(): Promise<GetOrderDto> {
-    
-    // const basket = await this.basketService.getDefaultBasket();
-    // const address = await this.customerService.getDefaultCustomerAddress();
+        // return {
+        //   order_type: DefaultOrderDto.order_type.toString(),
+        //   basket: [basket],
+        //   shipping_address: [address],
+        //   payment_address: [address]
+        // }
+        return null;
+    }
 
-    // return {
-    //   order_type: DefaultOrderDto.order_type.toString(),
-    //   basket: [basket],
-    //   shipping_address: [address],
-    //   payment_address: [address]
-    // }
-    return null;
-  }
+    update(id: number, updateOrderDto: UpdateOrderDto) {
+        return `This action updates a #${id} order`;
+    }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} order`;
-  }
+    remove(id: number) {
+        return `This action removes a #${id} order`;
+    }
 }

@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-// Plan 
-// There should be smth like Attribute tree for easier management 
+// Plan
+// There should be smth like Attribute tree for easier management
 // There should be a default list of attributes that customer will NOT be able to manage from Front End
 // Could be that I'll realize it via migrations that will run during project build
 // Final Thoughts
@@ -14,28 +14,28 @@ export class GetAttributeDto {
     @IsNotEmpty()
     @IsNumber()
     @ApiProperty()
-        attribute_group_id: number;
+    attribute_group_id: number;
     @IsNotEmpty()
     @IsNumber()
     @ApiProperty()
-        attribute_id: number;
+    attribute_id: number;
     @IsNotEmpty()
     @IsString()
     @ApiProperty()
-        attribute_value: string;
+    attribute_value: string;
 }
 
 export class GetProductAttributesCollection {
     @IsNotEmpty()
     @IsNumber()
     @ApiProperty()
-        attribute_id: number;
+    attribute_id: number;
     @IsNotEmpty()
     @IsString()
     @ApiProperty()
-        attribute_code: string;
+    attribute_code: string;
     @IsNotEmpty()
     @IsString()
     @ApiProperty()
-        attribute_value: string;
+    attribute_value: string;
 }

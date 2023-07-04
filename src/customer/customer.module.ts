@@ -8,8 +8,14 @@ import { CustomerAddressDetails } from './entities/customer-address-detailed.ent
 import { AddressController } from './address.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Customer, CustomerAddress, CustomerAddressDetails])],
-  controllers: [CustomerController, AddressController],
-  providers: [CustomerService]
+    imports: [
+        TypeOrmModule.forFeature([
+            Customer,
+            CustomerAddress,
+            CustomerAddressDetails,
+        ]),
+    ],
+    controllers: [CustomerController, AddressController],
+    providers: [CustomerService],
 })
 export class CustomerModule {}

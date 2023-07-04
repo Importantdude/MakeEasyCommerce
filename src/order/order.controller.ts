@@ -1,11 +1,11 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -16,37 +16,40 @@ import { GetOrderDto } from './dto/get-order.dto';
 @ApiTags('Order')
 @Controller('order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+    constructor(private readonly orderService: OrderService) {}
 
-  @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
-  }
+    @Post()
+    create(@Body() createOrderDto: CreateOrderDto) {
+        return this.orderService.create(createOrderDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.orderService.findAll();
-  }
+    @Get()
+    findAll() {
+        return this.orderService.findAll();
+    }
 
-  @Get('defaultOrder')
-	@ApiOperation({ summary: 'Default Order', description: 'Idea is to fetch default (enum) hardcoded Order data' })
-	@ApiOkResponse({ description: 'Default Order Dto', type: GetOrderDto })
-  getDefaultOrder() {
-    return this.orderService.getDefaultOrder();
-  }
+    @Get('defaultOrder')
+    @ApiOperation({
+        summary: 'Default Order',
+        description: 'Idea is to fetch default (enum) hardcoded Order data',
+    })
+    @ApiOkResponse({ description: 'Default Order Dto', type: GetOrderDto })
+    getDefaultOrder() {
+        return this.orderService.getDefaultOrder();
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
-  }
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.orderService.findOne(+id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
-  }
+    @Patch(':id')
+    update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+        return this.orderService.update(+id, updateOrderDto);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
-  }
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.orderService.remove(+id);
+    }
 }
