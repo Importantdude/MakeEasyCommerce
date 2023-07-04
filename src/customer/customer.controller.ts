@@ -43,7 +43,7 @@ export class CustomerController {
     @Get('get/short/by/:id')
     @ApiOperation({
         summary: 'Find Customer short dto By Id',
-        description: 'Finds specifically Customer data by ID.',
+        description: 'Finds (specifically) Customer data by ID.',
     })
     @ApiOkResponse({
         description: 'Customer short dto',
@@ -57,7 +57,7 @@ export class CustomerController {
     @Get('get/short/all')
     @ApiOperation({
         summary: 'Find All Customers',
-        description: 'Get specifically Customers data',
+        description: 'Get (specifically) Customers data',
     })
     @ApiOkResponse({
         description: 'Customers short dto',

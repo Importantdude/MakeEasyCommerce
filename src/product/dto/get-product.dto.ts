@@ -8,7 +8,14 @@ import { ProductDto } from './create-product.dto';
 // most of them supposed to be trivial
 // So therefore ...
 //
-export class GetProductDto extends ProductDto {
+export class GetProductShortDto extends ProductDto {
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    id: number;
+}
+
+export class GetProductDto extends GetProductShortDto {
     @IsNumber()
     @IsNotEmpty()
     @ApiProperty()

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { DefaultOrderProductDto } from './dto/enum/enum-product.dto';
-import { GetProductDto } from './dto/get-product.dto';
+import { GetProductDto, GetProductShortDto } from './dto/get-product.dto';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { Product } from './entities/product.entity';
@@ -14,6 +14,7 @@ export class ProductService {
         private readonly entityManager: EntityManager,
     ) {}
 
+    // Create Product with main entity schema
     async create(createProductDto: CreateProductDto): Promise<GetProductDto> {
         const exist = await this.entityManager.findOne(Product, {
             where: {
@@ -37,14 +38,25 @@ export class ProductService {
         return null;
     }
 
-    findAll() {
-        return `This action returns all product`;
+    // Get All Products with main entity schema
+    async findAll(): Promise<GetProductShortDto[]> {
+        return await this.entityManager
+            .createQueryBuilder(Product, 'product')
+            .getMany();
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} product`;
+    // Find one Product with main entity schema
+    async findOne(id: number): Promise<GetProductShortDto> {
+        try {
+            return await this.entityManager.findOneOrFail(Product, {
+                where: { id: id },
+            });
+        } catch (e) {
+            return e.message;
+        }
     }
 
+    // Get Default Product with main entity schema
     async getDefaultProduct(): Promise<GetProductDto> {
         return {
             id: Number(DefaultOrderProductDto.id),
@@ -57,11 +69,41 @@ export class ProductService {
         };
     }
 
-    update(id: number, updateProductDto: UpdateProductDto) {
-        return `This action updates a #${id} product`;
+    // Update Customer
+    async update(
+        updateProductDto: UpdateProductDto,
+    ): Promise<GetProductShortDto> {
+        const partialEntityProduct: UpdateProductDto = {
+            id: updateProductDto.id,
+            ...updateProductDto,
+        };
+
+        const product: GetProductShortDto = await this.entityManager.preload(
+            Product,
+            partialEntityProduct,
+        );
+
+        try {
+            if (this.entityManager.hasId(product)) {
+                return (
+                    await this.entityManager.update(
+                        Product,
+                        updateProductDto.id,
+                        product,
+                    )
+                ).raw;
+            }
+        } catch (e) {
+            return e.message;
+        }
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} product`;
+    // Delete Product
+    async remove(id: number): Promise<number> {
+        try {
+            return (await this.entityManager.delete(Product, id)).affected;
+        } catch (e) {
+            return e.message;
+        }
     }
 }

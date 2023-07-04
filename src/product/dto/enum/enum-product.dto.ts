@@ -7,10 +7,3 @@ export enum DefaultOrderProductDto {
     product_type = 1,
     store_id = 1,
 }
-
-export type ProductVisibilityType =
-    | 'all'
-    | 'catalog'
-    | 'search'
-    | 'hidden'
-    | 'extended';
