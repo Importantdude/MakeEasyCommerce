@@ -56,12 +56,12 @@ export class AddressController {
     return this.customerService.getDefaultCustomerAddress();
   }
 
-  @Patch('update/:id')
-	@ApiOperation({ summary: 'Update Address', description: 'Update address' })
-	@ApiBody({ type: UpdateAddressDto, description: 'address', required: true })
-  async update(@Param('id') id: string, @Body() updateAddressDto: UpdateAddressDto): Promise<GetCustomerAddressDto> {
-    return await this.customerService.updateOneCustomerAddress(+id, updateAddressDto);
-  }
+  // @Patch('update/:id')
+	// @ApiOperation({ summary: 'Update Address', description: 'Update address' })
+	// @ApiBody({ type: UpdateAddressDto, description: 'address', required: true })
+  // async update(@Param('id') id: string, @Body() updateAddressDto: UpdateAddressDto): Promise<GetCustomerAddressDto> {
+  //   return await this.customerService.updateOneCustomerAddress(+id, updateAddressDto);
+  // }
 
   @Patch('update/many/')
 	@ApiOperation({ summary: 'Update Many Addresses', description: 'Update many address' })

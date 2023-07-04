@@ -25,7 +25,7 @@ export class CustomerAddress {
     //     foreignKeyConstraintName: "fk_customer_index_address"
     // })
         customer: CustomerAddress[];
-    @OneToOne(() => CustomerAddressDetails, (address_details) => address_details.id, { 
+    @OneToOne(() => CustomerAddressDetails, (address_details) => address_details.customer_address, { 
         cascade: true,
         eager: true,
         onDelete: 'CASCADE',

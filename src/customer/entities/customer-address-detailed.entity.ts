@@ -24,7 +24,7 @@ export class CustomerAddressDetails {
     @IsString()
     @Column()
         tax_id: string;
-    @OneToOne(() => CustomerAddress, (customer_address) => customer_address.id, { 
+    @OneToOne(() => CustomerAddress, (customer_address) => customer_address.address_details, { 
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     })

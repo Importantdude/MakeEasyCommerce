@@ -21,7 +21,7 @@ export class Customer {
         store_id: number;
     @OneToMany(() => CustomerAddress, (customer_address) => customer_address.customer, { 
         cascade: true,
-        eager: true,
+        // eager: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     })

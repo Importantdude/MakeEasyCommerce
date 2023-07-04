@@ -3,8 +3,8 @@ import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerAddressDto, UpdateCustomerDto } from './dto/update-customer.dto';
 import { DefaultOrderCustomerAddressDto, DefaultOrderCustomerDto, DefaultOrderCustomerAddressDetailsDto } from './dto/enum/enum-customer.dto';
 import { GetAddressCustomerDto, GetCustomerAddressDto, GetCustomerAddressShortDto, GetCustomerDto, GetCustomerShortDto } from './dto/get-customer.dto';
-import { EntityManager, Repository } from 'typeorm';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { EntityManager } from 'typeorm';
+import { InjectEntityManager } from '@nestjs/typeorm';
 import { Customer } from './entities/customer.entity';
 import { CustomerAddressDetails } from './entities/customer-address-detailed.entity';
 import { CustomerAddress } from './entities/customer-address.entity';
@@ -13,12 +13,6 @@ import { CustomerAddress } from './entities/customer-address.entity';
 export class CustomerService {
 
 	constructor(
-		// @InjectRepository(Customer)
-		// private readonly customerRepository: Repository<Customer>,
-		// @InjectRepository(CustomerAddress)
-		// private readonly customerAddressRepository: Repository<CustomerAddress>,
-		// @InjectRepository(CustomerAddressDetails)
-    // private readonly customerAddressDetailsRepository: Repository<CustomerAddressDetails>,
     @InjectEntityManager()
     private readonly entityManager: EntityManager
 	) {}
@@ -83,9 +77,13 @@ export class CustomerService {
 
   // Customer
   async findOneShort(id: number): Promise<GetCustomerShortDto> {
-    return this.entityManager.findOneOrFail(Customer, {
-      where: { id: id }
-    })
+    try{
+      return await this.entityManager.findOneOrFail(Customer, {
+        where: { id: id }
+      });
+    }catch(e){
+      return e.message;
+    }
   }
 
   async findOne(id: number): Promise<GetCustomerDto> {
@@ -155,9 +153,11 @@ export class CustomerService {
     const customer : GetCustomerShortDto = await this.entityManager.preload(Customer, partialEntityCustomer);
 
     try {
-      return {
-        customer_address: await this.updateCustomerAddress(updateCustomerDto.customer_address),
-        ...await this.entityManager.save(Customer, customer)
+      if(this.entityManager.hasId(customer)){
+        return {
+          customer_address: await this.updateCustomerAddress(updateCustomerDto.customer_address),
+          ...await this.entityManager.save(Customer, customer)
+        }  
       }
     } catch (e) {
       return e.message;
@@ -166,15 +166,6 @@ export class CustomerService {
   }
 
   // Update Address and it's details
-  async updateOneCustomerAddress(id: number, updateCustomerAddress: UpdateCustomerAddressDto ): Promise<GetCustomerAddressDto> {
-    try{
-      return (await this.entityManager.update(CustomerAddress, id, updateCustomerAddress)).raw;
-    } catch (e) {
-      return e.message;
-    }
-  }
-
-  // Update Many Address and it's details
   async updateCustomerAddress(updateCustomerAddress: UpdateCustomerAddressDto[] ): Promise<GetCustomerAddressDto[]> {
     const addresses : GetCustomerAddressDto[] = [];
 
@@ -193,25 +184,17 @@ export class CustomerService {
   // Remove Customer
   async remove(id: number) {
     const customer: GetCustomerDto = await this.findOne(id);
-    const customer_address: GetAddressCustomerDto[] = customer.customer_address.map( (address) => {
-      if(address.address_details.id != null){
-        return {
-          customer: customer,
-          address_details: address.address_details,
-          ...address
-        }
-      }
-    })
 
     try{
 
-      const removed_customer = (await this.entityManager.delete(Customer, customer)).affected;
+      const customer_address: GetAddressCustomerDto[] = this.generateReversingCustomerAddress(customer);
+      const removed_customer = (await this.entityManager.delete(Customer, customer.id)).affected;
 
       if(removed_customer < 1){
         return 'Something went wrong';
       }
 
-      const removed_details = await this.deleteCustomerAddresses(customer.customer_address);
+      const removed_details = await this.deleteCustomerAddresses(customer_address);
 
       if(removed_details < 1){
         return 'Customer was successfully removed';
@@ -260,6 +243,7 @@ export class CustomerService {
     return null;
   }
 
+  // Gets DEFAULT DATA for entity
   async getDefaultCustomer(): Promise<GetCustomerDto> {
     return {
       id: Number(DefaultOrderCustomerDto.id), 
@@ -305,4 +289,19 @@ export class CustomerService {
     }
   }
 
+  // Basically inverts relation Customer -> Address 
+  // to Address -> Customer
+  private generateReversingCustomerAddress(customer: GetCustomerDto){
+    const generated: GetAddressCustomerDto[] = customer.customer_address.map( (address) => {
+      if(address.address_details.id != null){
+        return {
+          customer: customer,
+          address_details: address.address_details,
+          ...address
+        }
+      }
+    })
+
+    return generated;    
+  }
 }
