@@ -1,12 +1,4 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Patch,
-    Param,
-    Delete,
-} from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import {
     ApiBody,
@@ -26,15 +18,12 @@ import { UpdateAddressDto } from './dto/update-customer.dto';
 export class AddressController {
     constructor(private readonly customerService: CustomerService) {}
 
-    // This needs to be rebuild for post request
-    // to create address outside customer entity
-
+    // I'm not fully sure that this entity needs
+    // separate post request due to
+    // even if admin will have to add address somewhere
+    // it either should be attached to guest user
+    // ot to customers relation
     // @Post('new')
-    // @ApiOperation({ summary: 'Create Customer', description: 'Create customer' })
-    // @ApiBody({ type: CreateCustomerDto, description: 'customer', required: true })
-    // async create(@Body() CreateCustomerDto: CreateCustomerDto): Promise<GetCustomerDto> {
-    //   return await this.customerService.create(CreateCustomerDto);
-    // }
 
     @Get('get/short/by/:id')
     @ApiOperation({
@@ -106,13 +95,6 @@ export class AddressController {
     async getDefaultCustomerAddress(): Promise<GetCustomerAddressDto> {
         return this.customerService.getDefaultCustomerAddress();
     }
-
-    // @Patch('update/:id')
-    // @ApiOperation({ summary: 'Update Address', description: 'Update address' })
-    // @ApiBody({ type: UpdateAddressDto, description: 'address', required: true })
-    // async update(@Param('id') id: string, @Body() updateAddressDto: UpdateAddressDto): Promise<GetCustomerAddressDto> {
-    //   return await this.customerService.updateOneCustomerAddress(+id, updateAddressDto);
-    // }
 
     @Patch('update/many/')
     @ApiOperation({
