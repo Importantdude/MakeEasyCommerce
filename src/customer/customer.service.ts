@@ -39,6 +39,7 @@ export class CustomerService {
             where: {
                 email: createCustomerDto.email,
             },
+            select: ['email'],
         });
 
         if (exist.email != null) {

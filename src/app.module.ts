@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Customer } from './customer/entities/customer.entity';
 import { CustomerAddress } from './customer/entities/customer-address.entity';
 import { CustomerAddressDetails } from './customer/entities/customer-address-detailed.entity';
+import { Product } from './product/entities/product.entity';
 
 @Module({
     imports: [
@@ -24,7 +25,12 @@ import { CustomerAddressDetails } from './customer/entities/customer-address-det
             database: process.env.TYPEORM_DATABASE,
             username: process.env.TYPEORM_USERNAME,
             password: process.env.TYPEORM_PASSWORD,
-            entities: [Customer, CustomerAddress, CustomerAddressDetails],
+            entities: [
+                Customer,
+                CustomerAddress,
+                CustomerAddressDetails,
+                Product,
+            ],
             migrations: ['dist/migrations/*.{ts,js}'],
             migrationsTableName: 'typeorm_migrations',
             logger: 'file',

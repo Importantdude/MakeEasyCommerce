@@ -10,7 +10,7 @@ import {
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetProductDto } from './dto/get-product.dto';
 
 @ApiTags('Product')
@@ -18,9 +18,20 @@ import { GetProductDto } from './dto/get-product.dto';
 export class ProductController {
     constructor(private readonly productService: ProductService) {}
 
-    @Post()
-    create(@Body() createProductDto: CreateProductDto) {
-        return this.productService.create(createProductDto);
+    @Post('new')
+    @ApiOperation({
+        summary: 'Create Product',
+        description: 'Create product',
+    })
+    @ApiBody({
+        type: CreateProductDto,
+        description: 'product',
+        required: true,
+    })
+    async create(
+        @Body() createProductDto: CreateProductDto,
+    ): Promise<GetProductDto> {
+        return await this.productService.create(createProductDto);
     }
 
     @Get()
