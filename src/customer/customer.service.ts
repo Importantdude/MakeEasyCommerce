@@ -35,68 +35,21 @@ export class CustomerService {
     async create(
         createCustomerDto: CreateCustomerDto,
     ): Promise<GetCustomerDto> {
-        // const alreadyExists = await this.findOneBy(createCustomerDto.email, '', '');
+        const exist = await this.entityManager.findOne(Customer, {
+            where: {
+                email: createCustomerDto.email,
+            },
+        });
 
-        // if(alreadyExists.email != null){
-        //   return alreadyExists;
-        // }
-
+        if (exist.email != null) {
+            return exist;
+        }
         if (createCustomerDto.email) {
-            const customer = new Customer();
-            const addressRes = [];
-
-            customer.first_name = createCustomerDto.first_name;
-            customer.last_name = createCustomerDto.last_name;
-            customer.email = createCustomerDto.email;
-            customer.store_id = createCustomerDto.store_id;
-
-            if (createCustomerDto.customer_address) {
-                for (const address of createCustomerDto.customer_address) {
-                    const customerAddress = new CustomerAddress();
-                    const customerAddressDetails = new CustomerAddressDetails();
-                    let details: CustomerAddressDetails;
-
-                    customerAddress.country = address.country;
-                    customerAddress.postal_code = address.postal_code;
-                    customerAddress.address_type = address.address_type;
-
-                    if (address.address_details) {
-                        customerAddressDetails.phone_number =
-                            address.address_details.phone_number;
-                        customerAddressDetails.city =
-                            address.address_details.city;
-                        customerAddressDetails.street_name =
-                            address.address_details.street_name;
-                        customerAddressDetails.house_number =
-                            address.address_details.house_number;
-                        customerAddressDetails.company =
-                            address.address_details.company;
-                        customerAddressDetails.tax_id =
-                            address.address_details.tax_id;
-                        details = await this.entityManager.save(
-                            CustomerAddressDetails,
-                            customerAddressDetails,
-                        );
-                        // details = await this.customerAddressDetailsRepository.save(customerAddressDetails);
-                    }
-                    customerAddress.address_details = details;
-
-                    addressRes.push(
-                        await this.entityManager.save(
-                            CustomerAddress,
-                            customerAddress,
-                        ),
-                    );
-                    // addressRes.push(await this.customerAddressRepository.save(customerAddress));
-                }
-
-                customer.customer_address = addressRes;
-                return await this.entityManager.save(Customer, customer);
-                // return await this.customerRepository.save(customer);
-            }
-
+            const customer = this.entityManager.create(
+                Customer,
+                createCustomerDto,
+            );
             return await this.entityManager.save(Customer, customer);
-            // return await this.customerRepository.save(customer);
         }
 
         return null;
