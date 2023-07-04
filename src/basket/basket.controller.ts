@@ -28,15 +28,15 @@ export class BasketController {
         return this.basketService.findAll();
     }
 
-    @Get('defaultBasket')
-    @ApiOperation({
-        summary: 'Default Basket',
-        description: 'Idea is to fetch default (enum) hardcoded Basket data',
-    })
-    @ApiOkResponse({ description: 'Default Basket Dto', type: GetBasketDto })
-    getDefaultBasket() {
-        return this.basketService.getDefaultBasket();
-    }
+    // @Get('defaultBasket')
+    // @ApiOperation({
+    //     summary: 'Default Basket',
+    //     description: 'Idea is to fetch default (enum) hardcoded Basket data',
+    // })
+    // @ApiOkResponse({ description: 'Default Basket Dto', type: GetBasketDto })
+    // getDefaultBasket() {
+    //     return this.basketService.getDefaultBasket();
+    // }
 
     @Get(':id')
     findOne(@Param('id') id: string) {

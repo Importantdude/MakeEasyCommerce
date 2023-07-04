@@ -39,6 +39,7 @@ export class CustomerService {
             where: {
                 email: createCustomerDto.email,
             },
+            select: ['email'],
         });
 
         if (exist.email != null) {
@@ -81,7 +82,6 @@ export class CustomerService {
     async findAllCustomers(): Promise<GetCustomerShortDto[]> {
         return await this.entityManager
             .createQueryBuilder(Customer, 'customer')
-            // .leftJoinAndSelect('customer.customer_address','customer_address')
             .getMany();
     }
 
