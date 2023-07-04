@@ -42,7 +42,7 @@ export class CustomerService {
             select: ['email'],
         });
 
-        if (exist.email != null) {
+        if (exist != null && exist.email != null) {
             return exist;
         }
         if (createCustomerDto.email) {
@@ -148,7 +148,6 @@ export class CustomerService {
             Customer,
             partialEntityCustomer,
         );
-
         try {
             if (this.entityManager.hasId(customer)) {
                 return {

@@ -10,6 +10,7 @@ import { Customer } from './customer/entities/customer.entity';
 import { CustomerAddress } from './customer/entities/customer-address.entity';
 import { CustomerAddressDetails } from './customer/entities/customer-address-detailed.entity';
 import { Product } from './product/entities/product.entity';
+import { Basket } from './basket/entities/basket.entity';
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { Product } from './product/entities/product.entity';
                 CustomerAddress,
                 CustomerAddressDetails,
                 Product,
+                Basket,
             ],
             migrations: ['dist/migrations/*.{ts,js}'],
             migrationsTableName: 'typeorm_migrations',

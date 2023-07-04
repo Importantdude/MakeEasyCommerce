@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { ValidateNested, IsNumber, IsNotEmpty } from 'class-validator';
 import { CustomerDto } from './create-customer.dto';
 import {
@@ -44,6 +44,14 @@ export class GetCustomerAddressShortDto extends AddressShortDto {
 }
 
 export class GetCustomerShortDto extends CustomerDto {
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    id: number;
+}
+
+// export class GetBasketCustomerDto extends PartialType(CustomerDto) {
+export class GetBasketCustomerDto {
     @IsNumber()
     @IsNotEmpty()
     @ApiProperty()

@@ -5,11 +5,46 @@ import { GetBasketDto } from './dto/get-basket.dto';
 import { DefaultOrderBasketDto } from './dto/enum/enum-basket.dto';
 import { DefaultOrderProductDto } from 'src/product/dto/enum/enum-product.dto';
 import { DefaultOrderCustomerDto } from 'src/customer/dto/enum/enum-customer.dto';
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { EntityManager, In } from 'typeorm';
+import { Basket } from './entities/basket.entity';
+import { Product } from '@src/product/entities/product.entity';
+import { Customer } from '@src/customer/entities/customer.entity';
 
 @Injectable()
 export class BasketService {
-    create(createBasketDto: CreateBasketDto) {
-        return 'This action adds a new basket';
+    constructor(
+        @InjectEntityManager()
+        private readonly entityManager: EntityManager,
+    ) {}
+
+    async create(createBasketDto: CreateBasketDto): Promise<GetBasketDto> {
+        const basket = this.entityManager.create(Basket, createBasketDto);
+        const products = await this.entityManager
+            .createQueryBuilder(Product, 'product')
+            .where('id IN (:...ids)', {
+                ids: createBasketDto.product_ids,
+            })
+            .select('product.id')
+            .getMany();
+
+        if (products.length != createBasketDto.product_ids.length) {
+            return null;
+        }
+
+        const customers = await this.entityManager
+            .createQueryBuilder(Customer, 'customer')
+            .where('id IN (:...ids)', {
+                ids: createBasketDto.customer_ids,
+            })
+            .select('customer.id')
+            .getMany();
+
+        if (customers.length != createBasketDto.customer_ids.length) {
+            return null;
+        }
+
+        return await this.entityManager.save(Basket, basket);
     }
 
     findAll() {

@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateBasketDto } from './create-basket.dto';
+import { GetBasketDto } from './get-basket.dto';
 
-export class UpdateBasketDto extends PartialType(CreateBasketDto) {}
+export class UpdateBasketDto extends GetBasketDto {}

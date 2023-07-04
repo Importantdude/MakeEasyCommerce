@@ -4,12 +4,12 @@ import { BasketDto } from './create-basket.dto';
 
 // Requires to parameter like "conditions"
 // Will be used in future to maintain promo conditions,
-// Marketing, cart price/any other rules that supposed
-// to affect final price
+// Marketing, cart price/any other rule that suppose
+// to affect basket... P.S. personalization
 
 export class GetBasketDto extends BasketDto {
     @IsNotEmpty()
     @IsNumber()
     @ApiProperty()
-    basket_id: number;
+    id: number;
 }

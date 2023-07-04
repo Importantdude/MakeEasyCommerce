@@ -10,7 +10,7 @@ import {
 import { BasketService } from './basket.service';
 import { CreateBasketDto } from './dto/create-basket.dto';
 import { UpdateBasketDto } from './dto/update-basket.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetBasketDto } from './dto/get-basket.dto';
 
 @ApiTags('Basket')
@@ -18,11 +18,21 @@ import { GetBasketDto } from './dto/get-basket.dto';
 export class BasketController {
     constructor(private readonly basketService: BasketService) {}
 
-    @Post()
-    create(@Body() createBasketDto: CreateBasketDto) {
-        return this.basketService.create(createBasketDto);
+    @Post('new')
+    @ApiOperation({
+        summary: 'Create Basket',
+        description: 'Create (specifically) basket entity',
+    })
+    @ApiBody({
+        type: CreateBasketDto,
+        description: 'Create Basket',
+        required: true,
+    })
+    async create(
+        @Body() createBasketDto: CreateBasketDto,
+    ): Promise<GetBasketDto> {
+        return await this.basketService.create(createBasketDto);
     }
-
     @Get()
     findAll() {
         return this.basketService.findAll();
