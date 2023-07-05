@@ -1,3 +1,3 @@
-import { GetBasketDto } from './get-basket.dto';
+import { BasketDto } from './create-basket.dto';
 
-export class UpdateBasketDto extends GetBasketDto {}
+export class UpdateBasketDto extends BasketDto {}

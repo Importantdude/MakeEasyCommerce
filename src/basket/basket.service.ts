@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBasketDto } from './dto/create-basket.dto';
 import { UpdateBasketDto } from './dto/update-basket.dto';
-import { GetBasketDto } from './dto/get-basket.dto';
+import {
+    GetBasketDto,
+    GetBasketProductResponse,
+    GetBasketProductsTotalPrice,
+} from './dto/get-basket.dto';
 import { DefaultOrderBasketDto } from './dto/enum/enum-basket.dto';
 import { DefaultOrderProductDto } from 'src/product/dto/enum/enum-product.dto';
 import { DefaultOrderCustomerDto } from 'src/customer/dto/enum/enum-customer.dto';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, In } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { Basket } from './entities/basket.entity';
 import { Product } from '@src/product/entities/product.entity';
 import { Customer } from '@src/customer/entities/customer.entity';
@@ -22,14 +26,16 @@ export class BasketService {
         const basket = this.entityManager.create(Basket, createBasketDto);
         const products = await this.entityManager
             .createQueryBuilder(Product, 'product')
+            .select('product.id')
+            .addSelect('SUM(product.final_price)', 'product_price')
             .where('id IN (:...ids)', {
                 ids: createBasketDto.product_ids,
             })
-            .select('product.id')
-            .getMany();
+            .groupBy('product.id')
+            .getRawMany();
 
         if (products.length != createBasketDto.product_ids.length) {
-            return null;
+            throw 'Basket is empty';
         }
 
         const customers = await this.entityManager
@@ -41,47 +47,110 @@ export class BasketService {
             .getMany();
 
         if (customers.length != createBasketDto.customer_ids.length) {
-            return null;
+            // Should be extended in future
+            // 1. In case of guest customer,
+            // Should stay empty and filled in order module
+            // 2. For "Fast checkout" feature
+            // I prefer to inject data to order directly
+            // And later after success page to run query to create basket - Disadvantage is that will be problems managing stock
+            // Either to add data in basket first
+            // Depends if payment will be integrated in basket or in order module
+            // Guess is that it will make better performance
+            // AND - it's good question
+            // --INVESTIGATE--
+            // what options are available
+            throw 'No Customers assigned to basket';
         }
+
+        const basket_products = await this.getTotalProductPrice(products);
+        basket.basket_final_price = basket_products.total_price;
+        basket.product_count = basket_products.products_count;
 
         return await this.entityManager.save(Basket, basket);
     }
 
-    findAll() {
-        return `This action returns all basket`;
+    async findAll(): Promise<GetBasketDto[]> {
+        try {
+            return await this.entityManager
+                .getRepository(Basket)
+                .createQueryBuilder('basket')
+                .getMany();
+        } catch (e) {
+            return e.message;
+        }
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} basket`;
+    async findOne(id: number): Promise<GetBasketDto> {
+        try {
+            return await this.entityManager
+                .getRepository(Basket)
+                .createQueryBuilder('basket')
+                .where('basket.id = :id', { id: id })
+                .getOneOrFail();
+        } catch (e) {
+            return e.message;
+        }
     }
 
-    // async getDefaultBasket(): Promise<GetBasketDto> {
-    //     return {
-    //         basket_id: DefaultOrderBasketDto.basket_id,
-    //         basket_total_price: DefaultOrderBasketDto.basket_total_price,
-    //         products: [
-    //             {
-    //                 product_id: Number(DefaultOrderProductDto.product_id),
-    //                 total_price: Number(DefaultOrderProductDto.final_price),
-    //             },
-    //         ],
-    //         customer: [
-    //             {
-    //                 id: Number(DefaultOrderCustomerDto.id),
-    //                 first_name: null,
-    //                 last_name: null,
-    //                 email: null,
-    //                 store_id: null,
-    //             },
-    //         ],
-    //     };
-    // }
+    async update(
+        id: number,
+        updateBasketDto: UpdateBasketDto,
+    ): Promise<GetBasketDto> {
+        const basket = await this.entityManager.preload(Basket, {
+            id: id,
+            ...updateBasketDto,
+        });
 
-    update(id: number, updateBasketDto: UpdateBasketDto) {
-        return `This action updates a #${id} basket`;
+        const products = await this.entityManager
+            .createQueryBuilder(Product, 'product')
+            .select('product.id')
+            .addSelect('SUM(product.final_price)', 'product_price')
+            .where('id IN (:...ids)', {
+                ids: updateBasketDto.product_ids,
+            })
+            .groupBy('product.id')
+            .getRawMany();
+
+        const basket_products = await this.getTotalProductPrice(products);
+        basket.basket_final_price = basket_products.total_price;
+        basket.product_count = basket_products.products_count;
+
+        const res = (await this.entityManager.update(Basket, id, basket)).raw;
+        console.log(res);
+
+        return res;
+        // return (await this.entityManager.update(Basket, id, basket)).raw;
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} basket`;
+    async remove(id: number): Promise<number> {
+        return (await this.entityManager.delete(Basket, id)).affected;
+    }
+
+    private async getTotalProductPrice(
+        products: GetBasketProductsTotalPrice[],
+    ): Promise<GetBasketProductResponse> {
+        return {
+            products_count: products.length,
+            total_price: products
+                .filter((item: { product_price: number }) => item.product_price)
+                .reduce(
+                    (acc: number, item: { product_price: any }) =>
+                        acc + Number(item.product_price),
+                    0,
+                ),
+        };
+    }
+
+    async getDefaultBasket(): Promise<GetBasketDto> {
+        return {
+            id: Number(DefaultOrderBasketDto.id),
+            basket_final_price: Number(
+                DefaultOrderBasketDto.basket_final_price,
+            ),
+            product_ids: [Number(DefaultOrderBasketDto.product_ids)],
+            customer_ids: [Number(DefaultOrderBasketDto.customer_ids)],
+            store_id: Number(DefaultOrderBasketDto.store_id),
+            product_count: Number(DefaultOrderBasketDto.product_count),
+        };
     }
 }
