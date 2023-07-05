@@ -7,8 +7,6 @@ import {
     GetBasketProductsTotalPrice,
 } from './dto/get-basket.dto';
 import { DefaultOrderBasketDto } from './dto/enum/enum-basket.dto';
-import { DefaultOrderProductDto } from 'src/product/dto/enum/enum-product.dto';
-import { DefaultOrderCustomerDto } from 'src/customer/dto/enum/enum-customer.dto';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { Basket } from './entities/basket.entity';
@@ -115,11 +113,7 @@ export class BasketService {
         basket.basket_final_price = basket_products.total_price;
         basket.product_count = basket_products.products_count;
 
-        const res = (await this.entityManager.update(Basket, id, basket)).raw;
-        console.log(res);
-
-        return res;
-        // return (await this.entityManager.update(Basket, id, basket)).raw;
+        return (await this.entityManager.update(Basket, id, basket)).raw;
     }
 
     async remove(id: number): Promise<number> {
