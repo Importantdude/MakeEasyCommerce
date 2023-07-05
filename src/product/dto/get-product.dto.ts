@@ -15,12 +15,7 @@ export class GetProductShortDto extends ProductDto {
     id: number;
 }
 
-export class GetProductDto extends GetProductShortDto {
-    @IsNumber()
-    @IsNotEmpty()
-    @ApiProperty()
-    id: number;
-}
+export class GetProductDto extends GetProductShortDto {}
 
 export class GetProductAvailability {
     @IsNumber()

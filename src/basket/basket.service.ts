@@ -12,6 +12,7 @@ import { EntityManager } from 'typeorm';
 import { Basket } from './entities/basket.entity';
 import { Product } from '@src/product/entities/product.entity';
 import { Customer } from '@src/customer/entities/customer.entity';
+import { GetProductDto } from '@src/product/dto/get-product.dto';
 
 @Injectable()
 export class BasketService {
@@ -21,18 +22,20 @@ export class BasketService {
     ) {}
 
     async create(createBasketDto: CreateBasketDto): Promise<GetBasketDto> {
-        const basket = this.entityManager.create(Basket, createBasketDto);
-        const products = await this.entityManager
+        const products: GetProductDto[] = await this.entityManager
             .createQueryBuilder(Product, 'product')
-            .select('product.id')
-            .addSelect('SUM(product.final_price)', 'product_price')
+            .select()
             .where('id IN (:...ids)', {
                 ids: createBasketDto.product_ids,
             })
             .groupBy('product.id')
-            .getRawMany();
+            .getMany();
 
-        if (products.length != createBasketDto.product_ids.length) {
+        const productIds: number[] = products.map((el) => {
+            return el.id;
+        });
+
+        if (productIds.length != createBasketDto.product_ids.length) {
             throw 'Basket is empty';
         }
 
@@ -41,7 +44,6 @@ export class BasketService {
             .where('id IN (:...ids)', {
                 ids: createBasketDto.customer_ids,
             })
-            .select('customer.id')
             .getMany();
 
         if (customers.length != createBasketDto.customer_ids.length) {
@@ -49,21 +51,26 @@ export class BasketService {
             // 1. In case of guest customer,
             // Should stay empty and filled in order module
             // 2. For "Fast checkout" feature
-            // I prefer to inject data to order directly
-            // And later after success page to run query to create basket - Disadvantage is that will be problems managing stock
             // Either to add data in basket first
             // Depends if payment will be integrated in basket or in order module
-            // Guess is that it will make better performance
-            // AND - it's good question
+            // I guess that it will bring better performance
+            // AND - it's good question :D
             // --INVESTIGATE--
             // what options are available
             throw 'No Customers assigned to basket';
         }
 
+        const basket: CreateBasketDto = {
+            products: products,
+            customers: customers,
+            ...this.entityManager.create(Basket, createBasketDto),
+        };
+
         const basket_products = await this.getTotalProductPrice(products);
         basket.basket_final_price = basket_products.total_price;
         basket.product_count = basket_products.products_count;
-
+        basket.customer_ids = createBasketDto.customer_ids;
+        basket.product_ids = createBasketDto.product_ids;
         return await this.entityManager.save(Basket, basket);
     }
 
@@ -121,15 +128,15 @@ export class BasketService {
     }
 
     private async getTotalProductPrice(
-        products: GetBasketProductsTotalPrice[],
+        products: GetProductDto[],
     ): Promise<GetBasketProductResponse> {
         return {
             products_count: products.length,
             total_price: products
-                .filter((item: { product_price: number }) => item.product_price)
+                .filter((item) => item.final_price)
                 .reduce(
-                    (acc: number, item: { product_price: any }) =>
-                        acc + Number(item.product_price),
+                    (acc: number, item: { final_price: any }) =>
+                        acc + Number(item.final_price),
                     0,
                 ),
         };
