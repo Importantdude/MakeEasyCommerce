@@ -1,20 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { GetCustomerDto } from '@src/customer/dto/get-customer.dto';
 import { GetProductDto } from '@src/product/dto/get-product.dto';
-import { IsNotEmpty, IsNumber, IsOptional, ValidateNested } from 'class-validator';
-import { type } from 'os';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class BasketDto {
     @IsNumber()
     @ApiProperty()
     store_id: number;
-    @IsNumber()
-    @ApiProperty()
-    product_count: number;
-    @IsNumber()
-    @ApiProperty()
-    basket_final_price: number;
     // @IsNumber()
+    // @ApiProperty()
+    product_count: number;
+    // @IsNumber()
+    // @ApiProperty()
+    basket_final_price: number;
     @IsNotEmpty()
     @ApiProperty({ type: ['number'] })
     product_ids: number[];
@@ -27,12 +25,6 @@ export class BasketDto {
 }
 
 export class CreateBasketDto extends BasketDto {
-    @IsOptional()
-    @ApiProperty({ type: () => [GetProductDto] })
-    @ValidateNested()
     products: GetProductDto[];
-    @IsOptional()
-    @ApiProperty({ type: () => [GetCustomerDto] })
-    @ValidateNested()
     customers: GetCustomerDto[];
 }

@@ -1,5 +1,4 @@
 import { Customer } from '@src/customer/entities/customer.entity';
-import { Order } from '@src/order/entities/order.entity';
 import { Product } from '@src/product/entities/product.entity';
 import { IsNumber } from 'class-validator';
 import {
@@ -35,12 +34,12 @@ export class Basket {
     @JoinTable({
         name: 'basket_products',
         joinColumn: {
-            name: 'basket',
+            name: 'basket_id',
             referencedColumnName: 'id',
             foreignKeyConstraintName: 'fk_basket_product_basketId',
         },
         inverseJoinColumn: {
-            name: 'product',
+            name: 'product_id',
             referencedColumnName: 'id',
             foreignKeyConstraintName: 'fk_basket_product_productId',
         },
@@ -66,12 +65,12 @@ export class Basket {
     @JoinTable({
         name: 'basket_customers',
         joinColumn: {
-            name: 'basket',
+            name: 'basket_id',
             referencedColumnName: 'id',
             foreignKeyConstraintName: 'fk_basket_customer_basketId',
         },
         inverseJoinColumn: {
-            name: 'customer',
+            name: 'customer_id',
             referencedColumnName: 'id',
             foreignKeyConstraintName: 'fk_basket_customer_customerId',
         },

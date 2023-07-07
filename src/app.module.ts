@@ -15,8 +15,8 @@ import { Order } from './order/entities/order.entity';
 
 @Module({
     imports: [
-        CustomerModule,
         BasketModule,
+        CustomerModule,
         ProductModule,
         AttributesModule,
         OrderModule,

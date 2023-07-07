@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBasketDto } from './dto/create-basket.dto';
 import { UpdateBasketDto } from './dto/update-basket.dto';
-import {
-    GetBasketDto,
-    GetBasketProductResponse,
-    GetBasketProductsTotalPrice,
-} from './dto/get-basket.dto';
+import { GetBasketDto, GetBasketProductResponse } from './dto/get-basket.dto';
 import { DefaultOrderBasketDto } from './dto/enum/enum-basket.dto';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
@@ -69,8 +65,6 @@ export class BasketService {
         const basket_products = await this.getTotalProductPrice(products);
         basket.basket_final_price = basket_products.total_price;
         basket.product_count = basket_products.products_count;
-        basket.customer_ids = createBasketDto.customer_ids;
-        basket.product_ids = createBasketDto.product_ids;
         return await this.entityManager.save(Basket, basket);
     }
 
@@ -90,6 +84,8 @@ export class BasketService {
             return await this.entityManager
                 .getRepository(Basket)
                 .createQueryBuilder('basket')
+                .leftJoinAndSelect('basket.products', 'products')
+                .leftJoinAndSelect('basket.customers', 'customers')
                 .where('basket.id = :id', { id: id })
                 .getOneOrFail();
         } catch (e) {
@@ -101,30 +97,80 @@ export class BasketService {
         id: number,
         updateBasketDto: UpdateBasketDto,
     ): Promise<GetBasketDto> {
-        const basket = await this.entityManager.preload(Basket, {
-            id: id,
-            ...updateBasketDto,
-        });
+        const current = await this.findOne(id);
 
-        const products = await this.entityManager
+        const products: GetProductDto[] = await this.entityManager
             .createQueryBuilder(Product, 'product')
-            .select('product.id')
-            .addSelect('SUM(product.final_price)', 'product_price')
             .where('id IN (:...ids)', {
                 ids: updateBasketDto.product_ids,
             })
             .groupBy('product.id')
-            .getRawMany();
+            .getMany();
+
+        if (products.length > 0) {
+            await this.entityManager
+                .getRepository(Basket)
+                .createQueryBuilder('basket')
+                .relation(Basket, 'products')
+                .of(id)
+                .addAndRemove(products, current.products);
+        }
+
+        const customers = await this.entityManager
+            .createQueryBuilder(Customer, 'customer')
+            .where('id IN (:...ids)', {
+                ids: updateBasketDto.customer_ids,
+            })
+            .getMany();
+
+        if (customers.length > 0) {
+            await this.entityManager
+                .getRepository(Basket)
+                .createQueryBuilder('basket')
+                .relation(Basket, 'customers')
+                .of(id)
+                .addAndRemove(customers, current.customers);
+        }
 
         const basket_products = await this.getTotalProductPrice(products);
-        basket.basket_final_price = basket_products.total_price;
-        basket.product_count = basket_products.products_count;
+        const basket = {
+            basket_final_price: basket_products.total_price,
+            product_count: basket_products.products_count,
+            store_id: updateBasketDto.store_id,
+        };
 
-        return (await this.entityManager.update(Basket, id, basket)).raw;
+        console.log(basket);
+        try {
+            await this.entityManager
+                .getRepository(Basket)
+                .createQueryBuilder('basket')
+                .update()
+                .set(basket)
+                .where('basket.id = :id', { id: id })
+                .execute();
+
+            return await this.findOne(id);
+        } catch (e) {
+            return e.message;
+        }
     }
 
     async remove(id: number): Promise<number> {
         return (await this.entityManager.delete(Basket, id)).affected;
+    }
+
+    private async trimObjectValuesByKey(
+        obj: any,
+        keysToTrim: string[],
+    ): Promise<any> {
+        for (const [key, value] of Object.entries(obj)) {
+            if (keysToTrim.includes(key) && typeof value === 'string') {
+                obj[key] = value.trim();
+            } else if (typeof value === 'object') {
+                this.trimObjectValuesByKey(value, keysToTrim);
+            }
+        }
+        return obj;
     }
 
     private async getTotalProductPrice(
@@ -142,6 +188,21 @@ export class BasketService {
         };
     }
 
+    private async getDuplicatedIds(ids: number[]) {
+        // const duplicates = await this.getDuplicatedIds(
+        //     updateBasketDto.product_ids,
+        // );
+
+        // const filter_duplicated = updateBasketDto.product_ids.filter(
+        //     (e) => duplicates[e],
+        // );
+
+        return ids.reduce<{ [key: number]: number }>((a, e) => {
+            a[e] = ++a[e] || 0;
+            return a;
+        }, {});
+    }
+
     async getDefaultBasket(): Promise<GetBasketDto> {
         return {
             id: Number(DefaultOrderBasketDto.id),
@@ -152,6 +213,8 @@ export class BasketService {
             customer_ids: [Number(DefaultOrderBasketDto.customer_ids)],
             store_id: Number(DefaultOrderBasketDto.store_id),
             product_count: Number(DefaultOrderBasketDto.product_count),
+            products: null,
+            customers: null,
         };
     }
 }
