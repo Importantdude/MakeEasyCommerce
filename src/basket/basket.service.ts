@@ -41,36 +41,43 @@ export class BasketService {
             throw 'Basket is empty';
         }
 
-        const customers = await this.entityManager
-            .createQueryBuilder(Customer, 'customer')
-            .where('id IN (:...ids)', {
-                ids: createBasketDto.customer_ids,
-            })
-            .getMany();
+        if (createBasketDto.customer_ids.length > 0) {
+            const customers = await this.entityManager
+                .createQueryBuilder(Customer, 'customer')
+                .where('id IN (:...ids)', {
+                    ids: createBasketDto.customer_ids,
+                })
+                .getMany();
 
-        if (customers.length != createBasketDto.customer_ids.length) {
-            // Should be extended in future
-            // 1. In case of guest customer,
-            // Should stay empty and filled in order module
-            // 2. For "Fast checkout" feature
-            // Either to add data in basket first
-            // Depends if payment will be integrated in basket or in order module
-            // I guess that it will bring better performance
-            // AND - it's good question :D
-            // --INVESTIGATE--
-            // what options are available
-            throw 'No Customers assigned to basket';
+            const basket: CreateBasketDto = {
+                products: products,
+                customers: customers,
+                ...this.entityManager.create(Basket, createBasketDto),
+            };
+
+            const validateBasketData = await this.validateBasketData({
+                store_id: createBasketDto.store_id,
+                products,
+            });
+
+            basket.basket_final_price = validateBasketData.basket_final_price;
+            basket.product_count = validateBasketData.product_count;
+            return await this.entityManager.save(Basket, basket);
         }
 
         const basket: CreateBasketDto = {
             products: products,
-            customers: customers,
+            customers: null,
             ...this.entityManager.create(Basket, createBasketDto),
         };
 
-        const basket_products = await this.getTotalProductPrice({ products });
-        basket.basket_final_price = basket_products.total_price;
-        basket.product_count = basket_products.products_count;
+        const validateBasketData = await this.validateBasketData({
+            store_id: createBasketDto.store_id,
+            products,
+        });
+
+        basket.basket_final_price = validateBasketData.basket_final_price;
+        basket.product_count = validateBasketData.product_count;
         return await this.entityManager.save(Basket, basket);
     }
 
@@ -125,27 +132,61 @@ export class BasketService {
             });
         }
 
-        const customers: GetCustomerDto[] = await this.findCustomersByIds({
-            itemIds: updateBasketDto.customer_ids,
-            selectValues: null,
-            relationAlias: 'customer',
-            groupBy: 'id',
-        });
-
-        if (customers.length > 0) {
-            await this.updateBasketRelations({
-                id,
-                relationsAlias: 'basket',
-                relation: 'customers',
-                updated_relation: customers,
-                current_relation: current.customers,
-            });
-        }
-
         const basket: BasketShort = await this.validateBasketData({
             store_id: updateBasketDto.store_id,
             products,
         });
+
+        if (updateBasketDto.customer_ids.length > 0) {
+            const customers: GetCustomerDto[] = await this.findCustomersByIds({
+                itemIds: updateBasketDto.customer_ids,
+                selectValues: null,
+                relationAlias: 'customer',
+                groupBy: 'id',
+            });
+
+            // If customers_ids length is 1 and arr[1] is equal to 0
+            // let's delete all this basket -> customer relations
+            if (
+                customers.length > 0 &&
+                updateBasketDto.customer_ids.length === 1 &&
+                updateBasketDto.customer_ids[0] === 0
+            ) {
+                await this.deleteBasketRelations({
+                    id,
+                    relationsAlias: 'basket',
+                    relation: 'customers',
+                    current_relation: customers,
+                });
+            }
+
+            if (
+                customers.length > 0 &&
+                updateBasketDto.customer_ids.length > 0
+            ) {
+                await this.updateBasketRelations({
+                    id,
+                    relationsAlias: 'basket',
+                    relation: 'customers',
+                    updated_relation: customers,
+                    current_relation: current.customers,
+                });
+            }
+
+            try {
+                await this.entityManager
+                    .getRepository(Basket)
+                    .createQueryBuilder('basket')
+                    .update()
+                    .set(basket)
+                    .where('basket.id = :id', { id: id })
+                    .execute();
+
+                return await this.findOne({ id });
+            } catch (e) {
+                return e.message;
+            }
+        }
 
         try {
             await this.entityManager
