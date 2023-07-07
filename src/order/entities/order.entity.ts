@@ -1,4 +1,5 @@
 import { Basket } from '@src/basket/entities/basket.entity';
+import { Customer } from '@src/customer/entities/customer.entity';
 import { IsNumber } from 'class-validator';
 import {
     Column,
@@ -19,21 +20,19 @@ export class Order {
     @IsNumber()
     @Column()
     order_status: number;
-    @Column('simple-array')
-    address_ids: number[];
     @ManyToMany(() => Basket, {
-        eager: true,
         cascade: true,
+        eager: true,
     })
     @JoinTable({
-        name: 'web_order_basket',
+        name: 'order_baskets',
         joinColumn: {
-            name: 'order',
+            name: 'order_id',
             referencedColumnName: 'id',
             foreignKeyConstraintName: 'fk_order_basket_orderId',
         },
         inverseJoinColumn: {
-            name: 'basket',
+            name: 'basket_id',
             referencedColumnName: 'id',
             foreignKeyConstraintName: 'fk_order_basket_basketId',
         },
@@ -43,4 +42,27 @@ export class Order {
 
     @RelationId((order: Order) => order.baskets)
     basket_ids: number[];
+
+    @ManyToMany(() => Customer, {
+        cascade: true,
+        eager: true,
+    })
+    @JoinTable({
+        name: 'order_customer',
+        joinColumn: {
+            name: 'order_id',
+            referencedColumnName: 'id',
+            foreignKeyConstraintName: 'fk_order_customer_orderId',
+        },
+        inverseJoinColumn: {
+            name: 'customer_id',
+            referencedColumnName: 'id',
+            foreignKeyConstraintName: 'fk_order_customer_customerId',
+        },
+        synchronize: true,
+    })
+    customers: Customer[];
+
+    @RelationId((order: Order) => order.customers)
+    customers_ids: number[];
 }

@@ -10,7 +10,7 @@ import {
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetOrderDto } from './dto/get-order.dto';
 
 @ApiTags('Order')
@@ -18,9 +18,18 @@ import { GetOrderDto } from './dto/get-order.dto';
 export class OrderController {
     constructor(private readonly orderService: OrderService) {}
 
-    @Post()
-    create(@Body() createOrderDto: CreateOrderDto) {
-        return this.orderService.create(createOrderDto);
+    @Post('new')
+    @ApiOperation({
+        summary: 'Create Order',
+        description: 'Create (specifically) order entity',
+    })
+    @ApiBody({
+        type: CreateOrderDto,
+        description: 'Create Order',
+        required: true,
+    })
+    async create(@Body() createOrderDto: CreateOrderDto): Promise<GetOrderDto> {
+        return await this.orderService.create({ createOrderDto });
     }
 
     @Get()
