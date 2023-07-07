@@ -4,7 +4,7 @@ import { UpdateBasketDto } from './dto/update-basket.dto';
 import { GetBasketDto, GetBasketProductResponse } from './dto/get-basket.dto';
 import { DefaultOrderBasketDto } from './dto/enum/enum-basket.dto';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { Entity, EntityManager, EntityTarget } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { Basket } from './entities/basket.entity';
 import { Product } from '@src/product/entities/product.entity';
 import { Customer } from '@src/customer/entities/customer.entity';

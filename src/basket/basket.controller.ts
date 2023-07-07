@@ -85,7 +85,10 @@ export class BasketController {
         @Param('id') id: string,
         @Body() updateCustomerDto: UpdateBasketDto,
     ): Promise<GetBasketDto> {
-        return await this.basketService.update({ id: +id, updateBasketDto: updateCustomerDto });
+        return await this.basketService.update({
+            id: +id,
+            updateBasketDto: updateCustomerDto,
+        });
     }
 
     @Delete(':id')
