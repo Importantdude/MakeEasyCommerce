@@ -37,7 +37,7 @@ export class BasketController {
     async create(
         @Body() createBasketDto: CreateBasketDto,
     ): Promise<GetBasketDto> {
-        return await this.basketService.create(createBasketDto);
+        return await this.basketService.create({ createBasketDto });
     }
 
     // This one in future MUST have option
@@ -68,7 +68,7 @@ export class BasketController {
     })
     @ApiParam({ name: 'id', description: 'Basket id' })
     async findOneBasket(@Param('id') id: string): Promise<GetBasketDto> {
-        return await this.basketService.findOne(+id);
+        return await this.basketService.findOne({ id: +id });
     }
 
     @Patch('update/:id')
@@ -85,7 +85,7 @@ export class BasketController {
         @Param('id') id: string,
         @Body() updateCustomerDto: UpdateBasketDto,
     ): Promise<GetBasketDto> {
-        return await this.basketService.update(+id, updateCustomerDto);
+        return await this.basketService.update({ id: +id, updateBasketDto: updateCustomerDto });
     }
 
     @Delete(':id')
@@ -94,7 +94,7 @@ export class BasketController {
         description: 'Delete specifically basket data by id',
     })
     async removeBasket(@Param('id') id: string): Promise<number> {
-        return await this.basketService.remove(+id);
+        return await this.basketService.remove({ id: +id });
     }
 
     @Get('defaultBasket')

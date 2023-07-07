@@ -4,11 +4,13 @@ import { UpdateBasketDto } from './dto/update-basket.dto';
 import { GetBasketDto, GetBasketProductResponse } from './dto/get-basket.dto';
 import { DefaultOrderBasketDto } from './dto/enum/enum-basket.dto';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager } from 'typeorm';
+import { Entity, EntityManager, EntityTarget } from 'typeorm';
 import { Basket } from './entities/basket.entity';
 import { Product } from '@src/product/entities/product.entity';
 import { Customer } from '@src/customer/entities/customer.entity';
 import { GetProductDto } from '@src/product/dto/get-product.dto';
+import { GetCustomerDto } from '@src/customer/dto/get-customer.dto';
+import { BasketShort } from './basket.interface';
 
 @Injectable()
 export class BasketService {
@@ -17,7 +19,11 @@ export class BasketService {
         private readonly entityManager: EntityManager,
     ) {}
 
-    async create(createBasketDto: CreateBasketDto): Promise<GetBasketDto> {
+    async create({
+        createBasketDto,
+    }: {
+        createBasketDto: CreateBasketDto;
+    }): Promise<GetBasketDto> {
         const products: GetProductDto[] = await this.entityManager
             .createQueryBuilder(Product, 'product')
             .select()
@@ -62,7 +68,7 @@ export class BasketService {
             ...this.entityManager.create(Basket, createBasketDto),
         };
 
-        const basket_products = await this.getTotalProductPrice(products);
+        const basket_products = await this.getTotalProductPrice({ products });
         basket.basket_final_price = basket_products.total_price;
         basket.product_count = basket_products.products_count;
         return await this.entityManager.save(Basket, basket);
@@ -79,7 +85,7 @@ export class BasketService {
         }
     }
 
-    async findOne(id: number): Promise<GetBasketDto> {
+    async findOne({ id }: { id: number }): Promise<GetBasketDto> {
         try {
             return await this.entityManager
                 .getRepository(Basket)
@@ -93,53 +99,54 @@ export class BasketService {
         }
     }
 
-    async update(
-        id: number,
-        updateBasketDto: UpdateBasketDto,
-    ): Promise<GetBasketDto> {
-        const current = await this.findOne(id);
+    async update({
+        id,
+        updateBasketDto,
+    }: {
+        id: number;
+        updateBasketDto: UpdateBasketDto;
+    }): Promise<GetBasketDto> {
+        const current = await this.findOne({ id });
 
-        const products: GetProductDto[] = await this.entityManager
-            .createQueryBuilder(Product, 'product')
-            .where('id IN (:...ids)', {
-                ids: updateBasketDto.product_ids,
-            })
-            .groupBy('product.id')
-            .getMany();
+        const products: GetProductDto[] = await this.findProductsByIds({
+            itemIds: updateBasketDto.product_ids,
+            selectValues: null,
+            relationAlias: 'product',
+            groupBy: 'id',
+        });
 
         if (products.length > 0) {
-            await this.entityManager
-                .getRepository(Basket)
-                .createQueryBuilder('basket')
-                .relation(Basket, 'products')
-                .of(id)
-                .addAndRemove(products, current.products);
+            await this.updateBasketRelations({
+                id,
+                relationsAlias: 'basket',
+                relation: 'products',
+                updated_relation: products,
+                current_relation: current.products,
+            });
         }
 
-        const customers = await this.entityManager
-            .createQueryBuilder(Customer, 'customer')
-            .where('id IN (:...ids)', {
-                ids: updateBasketDto.customer_ids,
-            })
-            .getMany();
+        const customers: GetCustomerDto[] = await this.findCustomersByIds({
+            itemIds: updateBasketDto.customer_ids,
+            selectValues: null,
+            relationAlias: 'customer',
+            groupBy: 'id',
+        });
 
         if (customers.length > 0) {
-            await this.entityManager
-                .getRepository(Basket)
-                .createQueryBuilder('basket')
-                .relation(Basket, 'customers')
-                .of(id)
-                .addAndRemove(customers, current.customers);
+            await this.updateBasketRelations({
+                id,
+                relationsAlias: 'basket',
+                relation: 'customers',
+                updated_relation: customers,
+                current_relation: current.customers,
+            });
         }
 
-        const basket_products = await this.getTotalProductPrice(products);
-        const basket = {
-            basket_final_price: basket_products.total_price,
-            product_count: basket_products.products_count,
+        const basket: BasketShort = await this.validateBasketData({
             store_id: updateBasketDto.store_id,
-        };
+            products,
+        });
 
-        console.log(basket);
         try {
             await this.entityManager
                 .getRepository(Basket)
@@ -149,33 +156,56 @@ export class BasketService {
                 .where('basket.id = :id', { id: id })
                 .execute();
 
-            return await this.findOne(id);
+            return await this.findOne({ id });
         } catch (e) {
             return e.message;
         }
     }
 
-    async remove(id: number): Promise<number> {
-        return (await this.entityManager.delete(Basket, id)).affected;
+    async remove({ id }: { id: number }): Promise<number> {
+        const basket: GetBasketDto = await this.findOne({ id });
+
+        const basket_entity = await this.validateBasketData({
+            store_id: basket.store_id,
+            products: basket.products,
+        });
+
+        await this.deleteBasketRelations({
+            id,
+            relationsAlias: 'basket',
+            relation: 'products',
+            current_relation: basket.products,
+        });
+        await this.deleteBasketRelations({
+            id,
+            relationsAlias: 'basket',
+            relation: 'customers',
+            current_relation: basket.customers,
+        });
+        return (await this.entityManager.delete(Basket, basket_entity))
+            .affected;
     }
 
-    private async trimObjectValuesByKey(
-        obj: any,
-        keysToTrim: string[],
-    ): Promise<any> {
-        for (const [key, value] of Object.entries(obj)) {
-            if (keysToTrim.includes(key) && typeof value === 'string') {
-                obj[key] = value.trim();
-            } else if (typeof value === 'object') {
-                this.trimObjectValuesByKey(value, keysToTrim);
-            }
-        }
-        return obj;
+    private async validateBasketData({
+        store_id,
+        products,
+    }: {
+        store_id: number;
+        products: GetProductDto[];
+    }): Promise<BasketShort> {
+        const basket_products = await this.getTotalProductPrice({ products });
+        return {
+            store_id: store_id,
+            basket_final_price: basket_products.total_price,
+            product_count: basket_products.products_count,
+        };
     }
 
-    private async getTotalProductPrice(
-        products: GetProductDto[],
-    ): Promise<GetBasketProductResponse> {
+    private async getTotalProductPrice({
+        products,
+    }: {
+        products: GetProductDto[];
+    }): Promise<GetBasketProductResponse> {
         return {
             products_count: products.length,
             total_price: products
@@ -188,19 +218,106 @@ export class BasketService {
         };
     }
 
-    private async getDuplicatedIds(ids: number[]) {
-        // const duplicates = await this.getDuplicatedIds(
-        //     updateBasketDto.product_ids,
-        // );
+    private async findProductsByIds({
+        itemIds,
+        selectValues,
+        relationAlias,
+        groupBy,
+    }: {
+        itemIds: number[];
+        selectValues: string[];
+        relationAlias: string;
+        groupBy: string;
+    }): Promise<GetProductDto[]> {
+        if (selectValues != null) {
+            selectValues.map((el) => {
+                return `${relationAlias}.${el}`;
+            });
+        }
 
-        // const filter_duplicated = updateBasketDto.product_ids.filter(
-        //     (e) => duplicates[e],
-        // );
+        return await this.entityManager
+            .createQueryBuilder(Product, relationAlias)
+            .select(selectValues)
+            .where('id IN (:...ids)', {
+                ids: itemIds,
+            })
+            .groupBy(relationAlias + '.' + groupBy)
+            .getMany();
+    }
 
-        return ids.reduce<{ [key: number]: number }>((a, e) => {
-            a[e] = ++a[e] || 0;
-            return a;
-        }, {});
+    private async findCustomersByIds({
+        itemIds,
+        selectValues,
+        relationAlias,
+        groupBy,
+    }: {
+        itemIds: number[];
+        selectValues: string[];
+        relationAlias: string;
+        groupBy: string;
+    }): Promise<GetCustomerDto[]> {
+        if (selectValues != null) {
+            selectValues.map((el) => {
+                return `${relationAlias}.${el}`;
+            });
+        }
+
+        return await this.entityManager
+            .createQueryBuilder(Customer, relationAlias)
+            .select(selectValues)
+            .where('id IN (:...ids)', {
+                ids: itemIds,
+            })
+            .groupBy(relationAlias + '.' + groupBy)
+            .getMany();
+    }
+
+    private async updateBasketRelations({
+        id,
+        relationsAlias,
+        relation,
+        updated_relation,
+        current_relation,
+    }: {
+        id: number;
+        relationsAlias: string;
+        relation: string;
+        updated_relation: any[];
+        current_relation: any[];
+    }): Promise<any> {
+        try {
+            await this.entityManager
+                .getRepository(Basket)
+                .createQueryBuilder(relationsAlias)
+                .relation(Basket, relation)
+                .of(id)
+                .addAndRemove(updated_relation, current_relation);
+        } catch (e) {
+            return e.message;
+        }
+    }
+
+    private async deleteBasketRelations({
+        id,
+        relationsAlias,
+        relation,
+        current_relation,
+    }: {
+        id: number;
+        relationsAlias: 'basket';
+        relation: string;
+        current_relation: any[];
+    }): Promise<any> {
+        try {
+            await this.entityManager
+                .getRepository(Basket)
+                .createQueryBuilder(relationsAlias)
+                .relation(Basket, relation)
+                .of(id)
+                .remove(current_relation);
+        } catch (e) {
+            return e.message;
+        }
     }
 
     async getDefaultBasket(): Promise<GetBasketDto> {
@@ -216,5 +333,32 @@ export class BasketService {
             products: null,
             customers: null,
         };
+    }
+
+    // Needs to be tested or removed
+    private async getDuplicatedIds({
+        ids,
+    }: {
+        ids: number[];
+    }): Promise<{ [key: number]: number }> {
+        return ids.reduce<{ [key: number]: number }>((a, e) => {
+            a[e] = ++a[e] || 0;
+            return a;
+        }, {});
+    }
+
+    // Needs to be tested or removed
+    private async trimObjectValuesByKey(
+        obj: any,
+        keysToTrim: string[],
+    ): Promise<any> {
+        for (const [key, value] of Object.entries(obj)) {
+            if (keysToTrim.includes(key) && typeof value === 'string') {
+                obj[key] = value.trim();
+            } else if (typeof value === 'object') {
+                this.trimObjectValuesByKey(value, keysToTrim);
+            }
+        }
+        return obj;
     }
 }

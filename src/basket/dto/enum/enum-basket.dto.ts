@@ -5,4 +5,6 @@ export enum DefaultOrderBasketDto {
     product_count = 1,
     product_ids = 1,
     customer_ids = 1,
+    products = 'product-entity',
+    customers = 'customer-entity',
 }
