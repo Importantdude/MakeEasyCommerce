@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsBoolean, IsNotEmpty, IsNumber } from 'class-validator';
 import { ProductDto } from './create-product.dto';
 
@@ -15,12 +15,7 @@ export class GetProductShortDto extends ProductDto {
     id: number;
 }
 
-export class GetProductDto extends GetProductShortDto {
-    @IsNumber()
-    @IsNotEmpty()
-    @ApiProperty()
-    id: number;
-}
+export class GetProductDto extends GetProductShortDto {}
 
 export class GetProductAvailability {
     @IsNumber()
@@ -31,6 +26,13 @@ export class GetProductAvailability {
     @IsBoolean()
     @ApiProperty()
     is_visible: boolean;
+}
+
+export class GetBasketProductDto extends PartialType(ProductDto) {
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    id: number;
 }
 
 //

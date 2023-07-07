@@ -2,6 +2,7 @@ import { IsNumber, IsString } from 'class-validator';
 import {
     Column,
     Entity,
+    Index,
     JoinColumn,
     ManyToOne,
     OneToOne,
@@ -23,6 +24,7 @@ export class CustomerAddress {
     @IsNumber()
     @Column()
     address_type: number;
+    @Index()
     @ManyToOne(() => Customer, (customer) => customer.customer_address, {
         onDelete: 'CASCADE',
     })
@@ -34,6 +36,7 @@ export class CustomerAddress {
     //     foreignKeyConstraintName: "fk_customer_index_address"
     // })
     customer: CustomerAddress[];
+    @Index()
     @OneToOne(
         () => CustomerAddressDetails,
         (address_details) => address_details.customer_address,

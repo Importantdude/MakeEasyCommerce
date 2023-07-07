@@ -1,15 +1,9 @@
 import { IsEmail, IsNumber, IsString } from 'class-validator';
-import {
-    Column,
-    Entity,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    Unique,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { CustomerAddress } from './customer-address.entity';
 
 @Entity()
-@Unique(['email'])
+// @Unique(['email'])
 export class Customer {
     @PrimaryGeneratedColumn()
     id: number;

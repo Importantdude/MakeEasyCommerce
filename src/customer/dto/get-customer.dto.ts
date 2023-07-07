@@ -50,6 +50,14 @@ export class GetCustomerShortDto extends CustomerDto {
     id: number;
 }
 
+// export class GetBasketCustomerDto extends PartialType(CustomerDto) {
+export class GetBasketCustomerDto {
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    id: number;
+}
+
 export class GetAddressCustomerDto extends GetCustomerAddressDto {
     @IsNotEmpty()
     @ApiProperty({ type: () => GetCustomerShortDto })
