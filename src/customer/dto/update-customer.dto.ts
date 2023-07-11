@@ -1,40 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CustomerDto } from './create-customer.dto';
-import {
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    ValidateNested,
-} from 'class-validator';
-import { AddressDetailsDto, AddressDto } from './address/customer-address.dto';
+import { IsNotEmpty } from 'class-validator';
 
-export class UpdateAddressDetailsDto extends AddressDetailsDto {
-    @IsNumber()
-    @IsNotEmpty()
-    @ApiProperty()
-    id: number;
-}
+export class UpdateCustomerDto extends CustomerDto {}
 
-export class UpdateAddressDto extends AddressDto {
-    @IsNumber()
+export class UpdateCustomerAddressDto extends CustomerDto {
+    @ApiProperty({ type: [Number] })
     @IsNotEmpty()
-    @ApiProperty()
-    id: number;
-    @IsNotEmpty()
-    @ApiProperty({ type: () => UpdateAddressDetailsDto })
-    @ValidateNested()
-    address_details: UpdateAddressDetailsDto;
-}
-
-export class UpdateCustomerAddressDto extends UpdateAddressDto {}
-
-export class UpdateCustomerDto extends CustomerDto {
-    @IsNumber()
-    @IsOptional()
-    @ApiProperty()
-    id: number;
-    @IsNotEmpty()
-    @ApiProperty({ type: () => [UpdateAddressDto] })
-    @ValidateNested()
-    customer_address: UpdateAddressDto[];
+    address_ids: number[];
 }

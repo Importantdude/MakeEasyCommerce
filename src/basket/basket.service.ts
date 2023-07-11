@@ -122,6 +122,40 @@ export class BasketService {
             groupBy: 'id',
         });
 
+        // IMPORTANT START
+
+        // I want to do speed test using Promise.all()
+        // Current understanding tells me that if there
+        // will be smth in return I won't spend time on loading
+        // customer entities later cuz they might will work
+        // in parallel request in Promise.all
+
+        // Also can be implemented for updating relations
+        // In case if in same function exists more then 1
+        // await this.updateBasketRelations
+
+        // IMPORTANT END
+        // const test = await Promise.all([
+        //     await this.findProductsByIds({
+        //         itemIds: updateBasketDto.product_ids,
+        //         selectValues: null,
+        //         relationAlias: 'product',
+        //         groupBy: 'id',
+        //     }),
+        //     await this.findCustomersByIds({
+        //         itemIds: updateBasketDto.customer_ids,
+        //         selectValues: null,
+        //         relationAlias: 'customer',
+        //         groupBy: 'id',
+        //     }),
+        // ]);
+
+        // console.log(
+        //     test.map((promise) => {
+        //         console.log(promise);
+        //     }),
+        // );
+
         if (products.length > 0) {
             await this.updateBasketRelations({
                 id,
@@ -145,8 +179,8 @@ export class BasketService {
                 groupBy: 'id',
             });
 
-            // If customers_ids length is 1 and arr[1] is equal to 0
-            // let's delete all this basket -> customer relations
+            // If customers_ids length is 1 and arr[0] is equal to 0
+            // let's delete customers relation for this basket
             if (
                 customers.length > 0 &&
                 updateBasketDto.customer_ids.length === 1 &&

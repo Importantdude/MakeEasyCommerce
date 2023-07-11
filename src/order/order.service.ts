@@ -4,7 +4,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { GetOrderDto } from './dto/get-order.dto';
 import { DefaultOrderDto } from './dto/enum/enum-order.dto';
 import { BasketService } from 'src/basket/basket.service';
-import { CustomerService } from 'src/customer/customer.service';
+import { CustomerService } from '@src/customer/services/customer.service';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { GetBasketDto } from '@src/basket/dto/get-basket.dto';
@@ -47,7 +47,7 @@ export class OrderService {
             });
 
             const customerIds: number[] = customers.map((el) => {
-                return el.id;
+                return 1;
             });
 
             if (customerIds.length != createOrderDto.customers_ids.length) {
