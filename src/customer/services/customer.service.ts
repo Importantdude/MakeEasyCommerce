@@ -14,6 +14,7 @@ import {
     GetAddressDto,
 } from '../dto/address/get-address.dto';
 import {
+    UpdateCustomerAddressDetailsDto,
     UpdateCustomerAddressDto,
     UpdateCustomerDto,
 } from '../dto/update-customer.dto';
@@ -134,8 +135,6 @@ export class CustomerService {
         return await this.entityManager
             .getRepository(Customer)
             .createQueryBuilder('customer')
-            .innerJoin('customer.address', 'address')
-            .innerJoin('address.details', 'details')
             .update(Customer)
             .where('id = :id', { id: id })
             .set(updateCustomerDto)
@@ -147,8 +146,9 @@ export class CustomerService {
         updateCustomer,
     }: {
         id: number;
-        updateCustomer: UpdateCustomerAddressDto;
+        updateCustomer: UpdateCustomerAddressDetailsDto;
     }): Promise<any> {
+        updateCustomer.id = id;
         const current: GetCustomerAddressDetailsDto = await this.findOne({
             id: id,
             address: true,
@@ -162,21 +162,54 @@ export class CustomerService {
             updateCustomer.address_ids &&
             updateCustomer.address_ids.length > 0
         ) {
-            console.log('records needs to removed from relation');
-            // if provided array of address id's, then
-            // means some of them should be removed from this customer
-            const difference = current.address_ids.filter(
-                (item) => updateCustomer.address_ids.indexOf(item) < 0,
-            );
-            const address_id: number = difference.shift();
-            if (difference) {
-                // console.log(...difference);
-                await this.addressService.remove({
-                    id: address_id,
-                });
-            }
+            // Find way on how to understand from provided data
+            // if action request require only deleting existing relation
+            // in other words, customer had 5 addresses and decided
+            // to update email address and delete x amount of existing relations
+            //
+            // Following code might become useful, maybe...
+            // console.log('records needs to removed from relation');
+            // const difference = current.address_ids.filter(
+            //     (item) => updateCustomer.address_ids.indexOf(item) < 0,
+            // );
+            // const address_id: number = difference.shift();
+            // if (difference) {
+            //     // console.log(...difference);
+            //     await this.addressService.remove({
+            //         id: address_id,
+            //     });
+            // }
         }
 
+        if (
+            updateCustomer.address.length > 0 ||
+            updateCustomer.address != null
+        ) {
+            if (current.address_ids.length > 0 && current.address_ids != null) {
+                // if customer already had address before
+            }
+
+            const addresses: GetAddressDetailsDto[] =
+                await this.entityManager.save(Address, updateCustomer.address);
+
+            // updateCustomer.address_ids = addresses.map(({ id }) => id);
+            delete updateCustomer.address;
+
+            const res = await Promise.all([
+                await this.updateCustomerRelations({
+                    id,
+                    relation: 'address',
+                    updated_relation: addresses,
+                    current_relation: current.address,
+                }),
+                await this.update({
+                    id: id,
+                    updateCustomerDto: updateCustomer,
+                }),
+            ]);
+
+            console.log(res);
+        }
         return null;
     }
 

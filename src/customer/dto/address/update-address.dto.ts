@@ -24,6 +24,7 @@ export class UpdateAddressDto extends AddressDto {
 
 export class UpdateAddressDetailsDto extends UpdateAddressDto {
     @ApiProperty({ type: UpdateDetailsDto })
+    @IsNotEmpty()
     @ValidateNested()
     details: UpdateDetailsDto;
 }

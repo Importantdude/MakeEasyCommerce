@@ -24,7 +24,7 @@ import {
     GetCustomerAddressDto,
     GetCustomerDto,
 } from '../dto/get-customer.dto';
-import { UpdateCustomerAddressDto, UpdateCustomerDto } from '../dto/update-customer.dto';
+import { UpdateCustomerAddressDetailsDto, UpdateCustomerAddressDto, UpdateCustomerDto } from '../dto/update-customer.dto';
 import { UpdateAddressDetailsDto } from '../dto/address/update-address.dto';
 
 @ApiTags('Customer')
@@ -147,13 +147,13 @@ export class CustomerController {
         description: 'Update all customer data by id',
     })
     @ApiBody({
-        type: UpdateCustomerAddressDto,
+        type: UpdateCustomerAddressDetailsDto,
         description: 'Update customer body with address and its detail',
         required: true,
     })
     async updateCustomerAddressDetails(
         @Param('id') id: string,
-        @Body() updateBody: UpdateCustomerAddressDto,
+        @Body() updateBody: UpdateCustomerAddressDetailsDto,
     ): Promise<any> {
         return await this.customerService.updateCustomerAddressDetails({
             id: +id,
