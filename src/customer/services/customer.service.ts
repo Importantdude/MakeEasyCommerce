@@ -177,7 +177,7 @@ export class CustomerService {
             const addresses: GetAddressDetailsDto[] =
                 await this.entityManager.save(Address, updateCustomer.address);
 
-            // Something For Uncle Google or Aunt GPT
+            // SMTH For Uncle GOOGLE or Aunt GPT
             // each next request relies on result of action of previous await
             // except maybe for first one P.S. not sure
             // They are running in parallel
@@ -258,7 +258,65 @@ export class CustomerService {
     }): Promise<any> {
         console.log(id);
         console.log(address_ids);
-        return null;
+        const res = [];
+
+        // this will delete all customer addresses
+        if (address_ids === undefined) {
+            const customer_address = await this.entityManager
+                .getRepository(Address)
+                .createQueryBuilder('address')
+                .leftJoinAndSelect('address.customer', 'customer')
+                .select(['address.id', 'customer.id'])
+                .where('customer.id = :id', { id: id })
+                .getMany();
+
+            // SMTH For Uncle GOOGLE or Aunt GPT
+            // I want to know
+            // If it's worth if looping with Promise.all?
+            // Currently have 2 conditions
+            // Promise inside the loop, cuz loop works pretty fast
+            // and maybe sending this request in parallel might be more efficient???
+            // or Looping without promise, but using await.. I need result of remove action
+            // at some point this supposed to be helpful for debugging
+            // to see actual state of address body under this id
+            try {
+                customer_address.map(async (address_id) => {
+                    console.log(`Lets delete address with id ->${address_id}`);
+                    // await Promise.all([
+                    const result = await this.addressService.remove({
+                        id: address_id.id,
+                    });
+                    if (!result) {
+                        res.push(address_id);
+                    }
+                });
+
+                if (res.length === 0) {
+                    return true;
+                }
+            } catch (e) {
+                return res;
+            }
+        }
+
+        try {
+            address_ids.map(async (address_id) => {
+                console.log(`Lets delete address with id ->${address_id}`);
+                // await Promise.all([
+                const result = await this.addressService.remove({
+                    id: address_id,
+                });
+                if (!result) {
+                    res.push(address_id);
+                }
+            });
+
+            if (res.length === 0) {
+                return true;
+            }
+        } catch (e) {
+            return res;
+        }
     }
 
     protected async findCustomerQuery({
@@ -358,31 +416,5 @@ export class CustomerService {
         } catch (e) {
             return e.message;
         }
-    }
-
-    private async findAddressDetailsByIds({
-        itemIds,
-        selectValues,
-        groupBy,
-    }: {
-        itemIds: number[];
-        selectValues: string[];
-        groupBy: string;
-    }): Promise<GetAddressDetailsDto[]> {
-        if (selectValues != null) {
-            selectValues.map((el) => {
-                return `${'address'}.${el}`;
-            });
-        }
-        return await this.entityManager
-            .getRepository(Address)
-            .createQueryBuilder('address')
-            .leftJoinAndSelect('address.details', 'details')
-            .select(selectValues)
-            .where('address.id IN (:...ids)', {
-                ids: itemIds,
-            })
-            // .groupBy(groupBy)
-            .getMany();
     }
 }

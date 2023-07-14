@@ -86,20 +86,26 @@ export class AddressService {
         }
     }
 
-    // Find way to retrieve only address (OneToOne) -> details.id
-    // Smth with ".select()"... review query that is generated
-    // using .select to understand why it did not work...
     async remove({ id }: { id: number }): Promise<any> {
         try {
             const address = await this.entityManager
                 .getRepository(Address)
                 .createQueryBuilder('address')
                 .leftJoinAndSelect('address.details', 'details')
+                .select(['address.id', 'details.id'])
                 .where('address.id = :id', { id: id })
                 .getOne();
-            return await this.entityManager.delete(Details, address.details.id);
+
+            if (address.details != undefined) {
+                return await this.entityManager.delete(
+                    Details,
+                    address.details.id,
+                );
+            }
+
+            return true;
         } catch (e) {
-            return e.message;
+            return false;
         }
     }
 }
