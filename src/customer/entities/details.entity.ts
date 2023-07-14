@@ -1,9 +1,9 @@
 import { IsString } from 'class-validator';
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { CustomerAddress } from './customer-address.entity';
+import { Address } from './address.entity';
 
-@Entity()
-export class CustomerAddressDetails {
+@Entity('customer_address_details')
+export class Details {
     @PrimaryGeneratedColumn()
     id: number;
     @IsString()
@@ -24,13 +24,6 @@ export class CustomerAddressDetails {
     @IsString()
     @Column()
     tax_id: string;
-    @OneToOne(
-        () => CustomerAddress,
-        (customer_address) => customer_address.address_details,
-        {
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
-        },
-    )
-    customer_address: CustomerAddress;
+    @OneToOne(() => Address, (address) => address.details)
+    address: Address;
 }

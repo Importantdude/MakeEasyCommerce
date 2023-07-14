@@ -4,33 +4,34 @@ import {
     ValidateNested,
     IsNotEmpty,
     IsEmail,
-    IsOptional,
     IsNumber,
+    IsOptional,
 } from 'class-validator';
-import { AddressDto } from './address/customer-address.dto';
+import { CreateAddressDto } from './address/create-address.dto';
 
 export class CustomerDto {
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    @ApiProperty()
     first_name: string;
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    @ApiProperty()
     last_name: string;
+    @ApiProperty()
     @IsEmail()
     @IsNotEmpty()
-    @ApiProperty()
     email: string;
+    @ApiProperty()
     @IsNumber()
     @IsNotEmpty()
-    @ApiProperty()
     store_id: number;
+    // @ApiProperty({ type: [Number] })
+    address_ids: number[];
 }
 
-export class CreateCustomerDto extends CustomerDto {
-    @IsOptional()
-    @ApiProperty({ type: () => [AddressDto] })
-    @ValidateNested({ each: true })
-    customer_address: AddressDto[];
+export class CreateCustomerDto extends CustomerDto {}
+
+export class CreateCustomerAddressDto extends CustomerDto {
+    address: CreateAddressDto[];
 }

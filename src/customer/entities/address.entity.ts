@@ -9,10 +9,10 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Customer } from './customer.entity';
-import { CustomerAddressDetails } from './customer-address-detailed.entity';
+import { Details } from './details.entity';
 
-@Entity()
-export class CustomerAddress {
+@Entity('customer_address_index')
+export class Address {
     @PrimaryGeneratedColumn()
     id: number;
     @IsString()
@@ -25,7 +25,7 @@ export class CustomerAddress {
     @Column()
     address_type: number;
     @Index()
-    @ManyToOne(() => Customer, (customer) => customer.customer_address, {
+    @ManyToOne(() => Customer, (customer) => customer.address, {
         onDelete: 'CASCADE',
     })
     // Investigate
@@ -35,21 +35,17 @@ export class CustomerAddress {
     //     referencedColumnName: "id" ,
     //     foreignKeyConstraintName: "fk_customer_index_address"
     // })
-    customer: CustomerAddress[];
+    customer: Address[];
     @Index()
-    @OneToOne(
-        () => CustomerAddressDetails,
-        (address_details) => address_details.customer_address,
-        {
-            cascade: true,
-            eager: true,
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
-        },
-    )
+    @OneToOne(() => Details, (details) => details.address, {
+        cascade: true,
+        eager: true,
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+    })
     @JoinColumn({
-        name: 'address_details_id',
+        name: 'details_id',
         foreignKeyConstraintName: 'fk_address_index_details',
     })
-    address_details: CustomerAddressDetails;
+    details: Details;
 }

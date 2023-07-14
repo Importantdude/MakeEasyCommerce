@@ -1,21 +1,16 @@
 import { Module } from '@nestjs/common';
-import { CustomerController } from './customer.controller';
-import { CustomerService } from './customer.service';
+import { CustomerController } from './controllers/customer.controller';
+import { CustomerService } from './services/customer.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Customer } from './entities/customer.entity';
-import { CustomerAddress } from './entities/customer-address.entity';
-import { CustomerAddressDetails } from './entities/customer-address-detailed.entity';
-import { AddressController } from './address.controller';
+import { Address } from './entities/address.entity';
+import { Details } from './entities/details.entity';
+import { AddressService } from './services/address.service';
+import { AddressController } from './controllers/address.controller';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([
-            Customer,
-            CustomerAddress,
-            CustomerAddressDetails,
-        ]),
-    ],
+    imports: [TypeOrmModule.forFeature([Customer, Address, Details])],
     controllers: [CustomerController, AddressController],
-    providers: [CustomerService],
+    providers: [CustomerService, AddressService],
 })
 export class CustomerModule {}

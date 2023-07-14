@@ -1,8 +1,14 @@
 import { IsEmail, IsNumber, IsString } from 'class-validator';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { CustomerAddress } from './customer-address.entity';
+import {
+    Column,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    RelationId,
+} from 'typeorm';
+import { Address } from './address.entity';
 
-@Entity()
+@Entity('customer_index')
 // @Unique(['email'])
 export class Customer {
     @PrimaryGeneratedColumn()
@@ -19,15 +25,14 @@ export class Customer {
     @IsNumber()
     @Column()
     store_id: number;
-    @OneToMany(
-        () => CustomerAddress,
-        (customer_address) => customer_address.customer,
-        {
-            cascade: true,
-            // eager: true,
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
-        },
-    )
-    customer_address: CustomerAddress[];
+    @OneToMany(() => Address, (address) => address.customer, {
+        cascade: true,
+        eager: true,
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+    })
+    address: Address[];
+
+    @RelationId((customer: Customer) => customer.address)
+    address_ids: number[];
 }

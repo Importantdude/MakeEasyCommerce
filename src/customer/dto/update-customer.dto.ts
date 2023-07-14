@@ -6,35 +6,36 @@ import {
     IsOptional,
     ValidateNested,
 } from 'class-validator';
-import { AddressDetailsDto, AddressDto } from './address/customer-address.dto';
+import { UpdateAddressDetailsDto } from './address/update-address.dto';
 
-export class UpdateAddressDetailsDto extends AddressDetailsDto {
-    @IsNumber()
+export class UpdateCustomerDto extends CustomerDto {}
+
+export class UpdateCustomerAddressDto extends CustomerDto {
+    @ApiProperty({ type: [Number] })
     @IsNotEmpty()
-    @ApiProperty()
-    id: number;
+    address_ids: number[];
 }
 
-export class UpdateAddressDto extends AddressDto {
-    @IsNumber()
-    @IsNotEmpty()
+export class UpdateCustomerAddressDetailsDto extends CustomerDto {
     @ApiProperty()
-    id: number;
-    @IsNotEmpty()
-    @ApiProperty({ type: () => UpdateAddressDetailsDto })
-    @ValidateNested()
-    address_details: UpdateAddressDetailsDto;
-}
-
-export class UpdateCustomerAddressDto extends UpdateAddressDto {}
-
-export class UpdateCustomerDto extends CustomerDto {
-    @IsNumber()
     @IsOptional()
-    @ApiProperty()
+    @IsNumber()
     id: number;
-    @IsNotEmpty()
-    @ApiProperty({ type: () => [UpdateAddressDto] })
+    @ApiProperty({ type: [Number] })
+    @IsOptional()
+    address_ids: number[];
+    @ApiProperty({ type: [UpdateAddressDetailsDto] })
+    @IsOptional()
     @ValidateNested()
-    customer_address: UpdateAddressDto[];
+    address: UpdateAddressDetailsDto[];
+}
+
+export class DeleteCustomerAddressRelation {
+    @ApiProperty()
+    @IsOptional()
+    @IsNumber()
+    id: number;
+    @ApiProperty({ type: [Number] })
+    @IsNotEmpty()
+    address_ids: number[];
 }

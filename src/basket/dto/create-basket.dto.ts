@@ -7,17 +7,13 @@ export class BasketDto {
     @IsNumber()
     @ApiProperty()
     store_id: number;
-    // @IsNumber()
-    // @ApiProperty()
     product_count: number;
-    // @IsNumber()
-    // @ApiProperty()
     basket_final_price: number;
     @IsNotEmpty()
-    @ApiProperty({ type: ['number'] })
+    @ApiProperty({ type: [Number] })
     product_ids: number[];
     @IsNotEmpty()
-    @ApiProperty({ type: ['number'] })
+    @ApiProperty({ type: [Number] })
     customer_ids: number[];
     // @IsArray()
     // @ApiProperty()
