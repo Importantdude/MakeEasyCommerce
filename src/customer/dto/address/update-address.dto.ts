@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-    IsString,
     IsOptional,
     ValidateNested,
     IsNumber,
@@ -23,6 +22,10 @@ export class UpdateAddressDto extends AddressDto {
 }
 
 export class UpdateAddressDetailsDto extends UpdateAddressDto {
+    @ApiProperty()
+    @IsOptional()
+    @IsNumber()
+    id: number;
     @ApiProperty({ type: UpdateDetailsDto })
     @IsNotEmpty()
     @ValidateNested()

@@ -58,27 +58,29 @@ export class AddressService {
     }: {
         id: number;
         updateAddressDto: UpdateAddressDetailsDto;
-    }): Promise<any> {
-        try {
-            console.log('tried');
-            const address = await this.entityManager
-                .getRepository(Address)
-                .createQueryBuilder('address')
-                .leftJoinAndSelect('address.details', 'details')
-                .where('address.id = :id', { id: id })
-                .select(['address', 'details.id'])
-                .getOne();
-
-            console.log('updateAddressDto');
-            console.log(updateAddressDto);
-            const new_entity: GetAddressDetailsDto = {
+    }): Promise<GetAddressDetailsDto> {
+        const address = await this.entityManager
+            .getRepository(Address)
+            .createQueryBuilder('address')
+            .leftJoinAndSelect('address.details', 'details')
+            .select(['address.id', 'details'])
+            .where('address.id = :id', { id: id })
+            .getOne();
+        console.log('address.details');
+        console.log(address.details);
+        const new_entity: GetAddressDetailsDto = {
+            ...this.entityManager.create(Address, {
                 id: id,
-                ...this.entityManager.create(Address, updateAddressDto),
-            };
+                ...updateAddressDto,
+            }),
+        };
+        if (updateAddressDto.details === undefined) {
+            new_entity.details = address.details;
+        } else {
             new_entity.details.id = address.details.id;
-            console.log('new_entity');
-            console.log(new_entity);
-            return this.entityManager.save(Address, new_entity);
+        }
+        try {
+            return await this.entityManager.save(Address, new_entity);
         } catch (e) {
             return e.message;
         }

@@ -24,7 +24,7 @@ import {
     GetCustomerAddressDto,
     GetCustomerDto,
 } from '../dto/get-customer.dto';
-import { UpdateCustomerAddressDetailsDto, UpdateCustomerAddressDto, UpdateCustomerDto } from '../dto/update-customer.dto';
+import { DeleteCustomerAddressRelation, UpdateCustomerAddressDetailsDto, UpdateCustomerAddressDto, UpdateCustomerDto } from '../dto/update-customer.dto';
 import { UpdateAddressDetailsDto } from '../dto/address/update-address.dto';
 
 @ApiTags('Customer')
@@ -158,6 +158,26 @@ export class CustomerController {
         return await this.customerService.updateCustomerAddressDetails({
             id: +id,
             updateCustomer: updateBody,
+        });
+    }
+
+    @Patch('delete/address/:id')
+    @ApiOperation({
+        summary: 'Delete Customer Relation Address by ID',
+        description: 'Delete specific customer address by id',
+    })
+    @ApiBody({
+        type: [Number],
+        description: 'Remove Customer Relation',
+        required: true,
+    })
+    async deleteAddressRelation(
+        @Param('id') id: string,
+        @Body() address_ids: number[],
+    ): Promise<any> {
+        return await this.customerService.deleteCustomerAddressRelation({
+            id: +id,
+            address_ids: address_ids,
         });
     }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from 'typeorm';
+import { EntityManager, IsNull } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import {
     GetCustomerAddressDetailsDto,
@@ -21,6 +21,8 @@ import {
 import { UpdateAddressDetailsDto } from '../dto/address/update-address.dto';
 import { AddressService } from './address.service';
 import { Details } from '../entities/details.entity';
+import { IsEmail, isEmpty } from 'class-validator';
+import { CustomerEntity } from '../interfaces/customer.interface';
 
 @Injectable()
 export class CustomerService {
@@ -154,62 +156,108 @@ export class CustomerService {
             address: true,
             details: true,
         });
-        console.log(
-            'address exists and should be only updated together with customer',
-        );
-
-        if (
-            updateCustomer.address_ids &&
-            updateCustomer.address_ids.length > 0
-        ) {
-            // Find way on how to understand from provided data
-            // if action request require only deleting existing relation
-            // in other words, customer had 5 addresses and decided
-            // to update email address and delete x amount of existing relations
-            //
-            // Following code might become useful, maybe...
-            // console.log('records needs to removed from relation');
-            // const difference = current.address_ids.filter(
-            //     (item) => updateCustomer.address_ids.indexOf(item) < 0,
-            // );
-            // const address_id: number = difference.shift();
-            // if (difference) {
-            //     // console.log(...difference);
-            //     await this.addressService.remove({
-            //         id: address_id,
-            //     });
-            // }
+        if (updateCustomer === undefined) {
+            throw 'update customer dto body is empty';
         }
 
-        if (
-            updateCustomer.address.length > 0 ||
-            updateCustomer.address != null
-        ) {
-            if (current.address_ids.length > 0 && current.address_ids != null) {
-                // if customer already had address before
-            }
+        const customer_entity: GetCustomerAddressDetailsDto = {
+            ...updateCustomer,
+        };
 
+        delete customer_entity.address;
+
+        // New Address + update customer
+        if (current.address_ids.length === 0) {
+            console.log('We created new address record and update customer');
+            // const customer_entity: GetCustomerAddressDetailsDto = {
+            //     ...updateCustomer,
+            // };
+
+            // delete customer_entity.address;
             const addresses: GetAddressDetailsDto[] =
                 await this.entityManager.save(Address, updateCustomer.address);
 
-            // updateCustomer.address_ids = addresses.map(({ id }) => id);
-            delete updateCustomer.address;
+            // Something For Uncle Google or Aunt GPT
+            // each next request relies on result of action of previous await
+            // except maybe for first one P.S. not sure
+            // They are running in parallel
+            // My preferable expectations ->
+            // order of Promise object, but looks like always the same
+            // I expect for "findOneBuy" to get updated data from "update"
+            // which also supposed by that time include updated
+            // relation ids from "updateCustomerRelations"
+            //
+            // Currently logical seems that this needs to
+            // separated from "Promise.all()"
+            // But so I would not forget to get answer's on my questions
+            // I'll just leave it here working with ".Promise.all()"
+            // With extremely big comment so it will annoy me every time I see it
+            // Simply because for current state of project works just fine
+            // also, according to what wrote before,
+            // I have no clue why it's working then...
 
-            const res = await Promise.all([
-                await this.updateCustomerRelations({
-                    id,
-                    relation: 'address',
-                    updated_relation: addresses,
-                    current_relation: current.address,
+            return (
+                await Promise.all([
+                    await this.updateCustomerRelations({
+                        id,
+                        relation: 'address',
+                        updated_relation: addresses,
+                        current_relation: current.address,
+                    }),
+                    await this.update({
+                        id: id,
+                        updateCustomerDto: customer_entity,
+                    }),
+                    await this.findOneBy({
+                        filter: 'id',
+                        value: id,
+                        address: true,
+                        details: true,
+                    }),
+                ])
+            ).slice(-1);
+        }
+
+        // To update current customer together with
+        // it's existing Address together or separate from Details record
+        // I need to have at least address_index record id
+        // hope one day I'll wake up with genius solution
+        // address_id is mandatory for now...
+        if (
+            (updateCustomer.address_ids === undefined ||
+                updateCustomer.address_ids.shift() === 0) &&
+            current.address_ids.length > 0
+        ) {
+            await Promise.all([
+                updateCustomer.address.map(async (address) => {
+                    if (address.id != undefined) {
+                        await this.addressService.update({
+                            id: address.id,
+                            updateAddressDto: address,
+                        });
+                    }
                 }),
                 await this.update({
                     id: id,
-                    updateCustomerDto: updateCustomer,
+                    updateCustomerDto: customer_entity,
                 }),
             ]);
-
-            console.log(res);
+            return;
         }
+
+        console.log('none');
+        return null;
+    }
+
+    async deleteCustomerAddressRelation({
+        id,
+        address_ids,
+    }: {
+        id: number;
+        address_ids: number[];
+    }): Promise<any> {
+        console.log(id);
+        console.log(address_ids);
         return null;
     }
 
@@ -296,8 +344,12 @@ export class CustomerService {
         updated_relation: any[];
         current_relation: any[];
     }): Promise<any> {
+        console.log('updated_relation');
+        console.log(updated_relation);
+        console.log('current_relation');
+        console.log(current_relation);
         try {
-            await this.entityManager
+            return await this.entityManager
                 .getRepository(Customer)
                 .createQueryBuilder('customer')
                 .relation(Customer, relation)

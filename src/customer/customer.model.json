@@ -3,7 +3,7 @@
     "last_name": "Customer Last Name",
     "email": "customer2@mec.com",
     "store_id": 10,
-    "customer_address": 
+    "address": 
     [
         {
             "country": "United States",
@@ -52,7 +52,7 @@
     "last_name": "Daniel Last Name",
     "email": "daniel@mec.com",
     "store_id": 10,
-    "customer_address": 
+    "address": 
     [
         {
             "country": "United States",
